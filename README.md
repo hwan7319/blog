@@ -9,6 +9,16 @@ Cloudflare Workers and D1 backend for the blog mutual-support platform.
 3. Apply `migrations/0001_initial_schema.sql` locally, then to the target D1 database.
 4. Start the Worker with `npm run dev` and verify `GET /api/health`.
 
+## Production deployment
+
+1. Authenticate this computer with `npx wrangler login` and complete the Cloudflare browser sign-in.
+2. Create the production database with `npx wrangler d1 create blog-poom`.
+3. Copy the returned `database_id` into `wrangler.jsonc`; do not commit a different account's ID.
+4. Run `npm run db:migrate:remote`, set `BOOTSTRAP_ADMIN_SECRET`, then run `npm run deploy`.
+5. Register the first member in the deployed site and call the bootstrap endpoint described below once. Remove `BOOTSTRAP_ADMIN_SECRET` afterward.
+
+The production database ID remains intentionally unset in this repository until the Cloudflare account is authenticated.
+
 ## Authentication API
 
 - `POST /api/auth/signup` creates a pending user.
