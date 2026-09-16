@@ -40,4 +40,13 @@ An authenticated administrator can then use:
 - `POST /api/rooms/:roomId/participants` joins an open room. The server enforces room start time, capacity, and one participation per member.
 - `DELETE /api/rooms/:roomId` is available only to the creator before anybody has joined.
 
+## Completion and penalties
+
+- `GET /api/rooms/:roomId/participants` exposes a participant list only to a room participant or its creator.
+- `POST /api/rooms/:roomId/visits/:targetUserId` records one visit per target and marks a member complete after every other participant has been visited.
+- `POST /api/rooms/:roomId/participant-reports/:targetUserId` creates one post-close participant-report penalty.
+- `POST /api/penalties/:penaltyId/resolve` lets the penalized member resolve a penalty after completing its source room.
+
+The one-minute scheduled job closes expired rooms, rechecks actual visits, marks completed participants, and creates automatic incomplete penalties. The daily job locks accounts whose unresolved penalties are at least two days old.
+
 The initial migration establishes the relational schema. Room workflows, scheduled closure, the existing frontend migration, and Google Sheets data import follow in separate changes.

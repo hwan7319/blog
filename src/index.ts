@@ -1,6 +1,7 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
 import { bootstrapAdmin, listUsers, updateAccountStatus } from "./admin";
 import { createRoom, deleteRoom, getRoom, joinRoom, listRooms } from "./rooms";
+import { closeExpiredRooms, getParticipants, lockOverduePenalties, releasePenalty, reportParticipant, visitParticipant } from "./activity";
 
 export interface Env {
   DB: D1Database;
@@ -39,13 +40,22 @@ export default {
 
     const joinMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})\/participants$/i);
     if (joinMatch && request.method === "POST") return joinRoom(request, env, joinMatch[1]);
+    if (joinMatch && request.method === "GET") return getParticipants(request, env, joinMatch[1]);
+
+    const visitMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})\/visits\/([0-9a-f-]{36})$/i);
+    if (visitMatch && request.method === "POST") return visitParticipant(request, env, visitMatch[1], visitMatch[2]);
+
+    const reportMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})\/participant-reports\/([0-9a-f-]{36})$/i);
+    if (reportMatch && request.method === "POST") return reportParticipant(request, env, reportMatch[1], reportMatch[2]);
+
+    const penaltyMatch = url.pathname.match(/^\/api\/penalties\/([0-9a-f-]{36})\/resolve$/i);
+    if (penaltyMatch && request.method === "POST") return releasePenalty(request, env, penaltyMatch[1]);
 
     return json({ error: "not_found" }, { status: 404 });
   },
 
   async scheduled(controller, env, ctx): Promise<void> {
-    // 방 마감과 패널티 처리 구현 전에는 작업을 수행하지 않는다.
-    // controller.cron으로 1분 마감 작업과 KST 자정 패널티 만료 작업을 구분할 예정이다.
-    ctx.waitUntil(env.DB.prepare("SELECT 1").run());
+    if (controller.cron === "* * * * *") ctx.waitUntil(closeExpiredRooms(env));
+    if (controller.cron === "0 15 * * *") ctx.waitUntil(lockOverduePenalties(env));
   },
 } satisfies ExportedHandler<Env>;

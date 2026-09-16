@@ -112,4 +112,36 @@ describe("room API", () => {
       .first<{ count: number }>();
     expect(count?.count).toBe(1);
   });
+
+  it("marks visits complete and penalizes only the incomplete member at closure", async () => {
+    const first = await createApprovedSession("visitor");
+    const second = await createApprovedSession("target");
+    const roomId = crypto.randomUUID();
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO rooms (id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, missions_json, created_at)
+         VALUES (?, ?, 'keyword', ?, 2, ?, ?, ?, '["공감"]', ?)`,
+      ).bind(roomId, "Completion test room", first.userId, now - 120_000, now - 60_000, now + 60_000, now),
+      env.DB.prepare(
+        "INSERT INTO room_participants (id, room_id, user_id, keyword, joined_at) VALUES (?, ?, ?, ?, ?)",
+      ).bind(crypto.randomUUID(), roomId, first.userId, "first", now - 110_000),
+      env.DB.prepare(
+        "INSERT INTO room_participants (id, room_id, user_id, keyword, joined_at) VALUES (?, ?, ?, ?, ?)",
+      ).bind(crypto.randomUUID(), roomId, second.userId, "second", now - 110_000),
+    ]);
+
+    const visit = await api(`/api/rooms/${roomId}/visits/${second.userId}`, { method: "POST", headers: { Cookie: first.cookie } });
+    expect(visit.status).toBe(200);
+    expect(await visit.json()).toMatchObject({ ok: true, completed: true });
+
+    await env.DB.prepare("UPDATE rooms SET closes_at = ? WHERE id = ?").bind(Date.now() - 1, roomId).run();
+    const participants = await api(`/api/rooms/${roomId}/participants`, { headers: { Cookie: first.cookie } });
+    expect(participants.status).toBe(200);
+
+    const penalties = await env.DB.prepare("SELECT user_id FROM penalties WHERE room_id = ? AND status = 'unresolved'")
+      .bind(roomId)
+      .all<{ user_id: string }>();
+    expect(penalties.results).toEqual([{ user_id: second.userId }]);
+  });
 });
