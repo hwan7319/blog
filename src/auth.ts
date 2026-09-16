@@ -101,7 +101,7 @@ function expiredSessionCookie(request: Request): string {
   return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`;
 }
 
-async function requestBody(request: Request): Promise<Record<string, unknown> | null> {
+export async function requestBody(request: Request): Promise<Record<string, unknown> | null> {
   try {
     const body = await request.json<unknown>();
     return body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : null;
@@ -110,7 +110,7 @@ async function requestBody(request: Request): Promise<Record<string, unknown> | 
   }
 }
 
-function stringValue(body: Record<string, unknown>, name: string): string {
+export function stringValue(body: Record<string, unknown>, name: string): string {
   return typeof body[name] === "string" ? body[name].trim() : "";
 }
 
@@ -219,9 +219,14 @@ export async function me(request: Request, env: Env): Promise<Response> {
 }
 
 export async function adminMe(request: Request, env: Env): Promise<Response> {
+  const user = await requireAdmin(request, env);
+  return user instanceof Response ? user : json({ user });
+}
+
+export async function requireAdmin(request: Request, env: Env): Promise<PublicUser | Response> {
   const user = await currentUser(request, env);
   if (!user) return error("authentication_required", 401);
-  return user.roles.includes("admin") ? json({ user }) : error("admin_required", 403);
+  return user.roles.includes("admin") ? user : error("admin_required", 403);
 }
 
 async function addAuditLog(env: Env, actorId: string, eventType: string, targetId: string, metadata: Record<string, unknown> = {}): Promise<void> {

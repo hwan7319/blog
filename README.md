@@ -17,4 +17,19 @@ Cloudflare Workers and D1 backend for the blog mutual-support platform.
 - `GET /api/auth/me` returns the authenticated user without any password data.
 - `GET /api/admin/me` additionally requires the `admin` role.
 
+## First administrator
+
+Set a one-time secret before deployment:
+
+```bash
+npx wrangler secret put BOOTSTRAP_ADMIN_SECRET
+```
+
+After the intended administrator has registered, call `POST /api/auth/bootstrap-admin` with their nickname in the JSON body and the same secret in the `X-Bootstrap-Admin-Secret` header. This endpoint works only while no administrator role exists. Remove the secret after the first administrator is created.
+
+An authenticated administrator can then use:
+
+- `GET /api/admin/users?status=pending`
+- `PATCH /api/admin/users/:userId/account-status` with `approved`, `rejected`, or `locked`
+
 The initial migration establishes the relational schema. Room workflows, scheduled closure, the existing frontend migration, and Google Sheets data import follow in separate changes.

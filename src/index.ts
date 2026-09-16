@@ -1,7 +1,9 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
+import { bootstrapAdmin, listUsers, updateAccountStatus } from "./admin";
 
 export interface Env {
   DB: D1Database;
+  BOOTSTRAP_ADMIN_SECRET?: string;
 }
 
 async function health(env: Env): Promise<Response> {
@@ -22,6 +24,11 @@ export default {
     if (request.method === "POST" && url.pathname === "/api/auth/logout") return logout(request, env);
     if (request.method === "GET" && url.pathname === "/api/auth/me") return me(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/me") return adminMe(request, env);
+    if (request.method === "POST" && url.pathname === "/api/auth/bootstrap-admin") return bootstrapAdmin(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/users") return listUsers(request, env);
+
+    const accountStatusMatch = url.pathname.match(/^\/api\/admin\/users\/([0-9a-f-]{36})\/account-status$/i);
+    if (request.method === "PATCH" && accountStatusMatch) return updateAccountStatus(request, env, accountStatusMatch[1]);
 
     return json({ error: "not_found" }, { status: 404 });
   },
