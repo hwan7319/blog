@@ -51,8 +51,10 @@ async function sendWorkerResponse(workerResponse: Response, response: express.Re
   workerResponse.headers.forEach((value, name) => {
     if (name.toLowerCase() !== "set-cookie") response.setHeader(name, value);
   });
-  const getSetCookie = (workerResponse.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
-  const cookies = getSetCookie?.() ?? (workerResponse.headers.get("set-cookie") ? [workerResponse.headers.get("set-cookie")!] : []);
+  const headersWithCookies = workerResponse.headers as Headers & { getSetCookie?: () => string[] };
+  const cookies = headersWithCookies.getSetCookie
+    ? headersWithCookies.getSetCookie()
+    : (workerResponse.headers.get("set-cookie") ? [workerResponse.headers.get("set-cookie")!] : []);
   if (cookies.length) response.setHeader("set-cookie", cookies);
   response.status(workerResponse.status).send(Buffer.from(await workerResponse.arrayBuffer()));
 }
