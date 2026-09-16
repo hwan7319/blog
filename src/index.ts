@@ -1,5 +1,5 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
-import { bootstrapAdmin, listUsers, updateAccountStatus } from "./admin";
+import { bootstrapAdmin, listAdminPenalties, listAdminReports, listAdminRooms, listAdminVisits, listAuditLogs, listUsers, updateAccountStatus, updateReportStatus } from "./admin";
 import { createRoom, deleteRoom, getRoom, joinRoom, listRooms } from "./rooms";
 import { closeExpiredRooms, getParticipants, lockOverduePenalties, releasePenalty, reportParticipant, visitParticipant } from "./activity";
 import { createReport, myParticipations, myPenalties, weeklyActivity } from "./dashboard";
@@ -34,11 +34,19 @@ export default {
     if (request.method === "GET" && url.pathname === "/api/me/penalties") return myPenalties(request, env);
     if (request.method === "POST" && url.pathname === "/api/reports") return createReport(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/users") return listUsers(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/rooms") return listAdminRooms(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/visits") return listAdminVisits(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/penalties") return listAdminPenalties(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/reports") return listAdminReports(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/audit-logs") return listAuditLogs(request, env);
     if (request.method === "GET" && url.pathname === "/api/rooms") return listRooms(request, env);
     if (request.method === "POST" && url.pathname === "/api/rooms") return createRoom(request, env);
 
     const accountStatusMatch = url.pathname.match(/^\/api\/admin\/users\/([0-9a-f-]{36})\/account-status$/i);
     if (request.method === "PATCH" && accountStatusMatch) return updateAccountStatus(request, env, accountStatusMatch[1]);
+
+    const reportStatusMatch = url.pathname.match(/^\/api\/admin\/reports\/([0-9a-f-]{36})\/status$/i);
+    if (request.method === "PATCH" && reportStatusMatch) return updateReportStatus(request, env, reportStatusMatch[1]);
 
     const roomMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})$/i);
     if (roomMatch && request.method === "GET") return getRoom(request, env, roomMatch[1]);

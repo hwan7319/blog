@@ -31,6 +31,8 @@ An authenticated administrator can then use:
 
 - `GET /api/admin/users?status=pending`
 - `PATCH /api/admin/users/:userId/account-status` with `approved`, `rejected`, or `locked`
+- `GET /api/admin/rooms`, `/visits`, `/penalties`, `/reports`, and `/audit-logs` to read operational history
+- `PATCH /api/admin/reports/:reportId/status` with `resolved` or `dismissed`
 
 ## Room API
 

@@ -12,6 +12,7 @@ type UserListRow = {
 };
 
 const ALLOWED_ACCOUNT_STATUSES = new Set(["approved", "rejected", "locked"]);
+const ALLOWED_REPORT_STATUSES = new Set(["resolved", "dismissed"]);
 
 function isResponse(value: PublicUser | Response): value is Response {
   return value instanceof Response;
@@ -43,6 +44,11 @@ async function audit(env: Env, actorId: string, eventType: string, targetId: str
   await env.DB.prepare(
     "INSERT INTO audit_logs (id, actor_id, event_type, target_type, target_id, metadata_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
   ).bind(crypto.randomUUID(), actorId, eventType, "user", targetId, JSON.stringify(metadata), Date.now()).run();
+}
+
+function listLimit(request: Request): number {
+  const requested = Number(new URL(request.url).searchParams.get("limit") ?? 100);
+  return Number.isSafeInteger(requested) ? Math.min(Math.max(requested, 1), 300) : 100;
 }
 
 export async function bootstrapAdmin(request: Request, env: Env): Promise<Response> {
@@ -107,4 +113,91 @@ export async function updateAccountStatus(request: Request, env: Env, userId: st
     .bind(accountStatus, approvedAt, now, userId).run();
   await audit(env, admin.id, "account_status_changed", userId, { from: user.account_status, to: accountStatus });
   return json({ user: toPublicUser({ ...user, account_status: accountStatus, approved_at: approvedAt }) });
+}
+
+export async function listAdminRooms(request: Request, env: Env): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const result = await env.DB.prepare(
+    `SELECT r.id, r.name, r.room_type, r.capacity, r.join_starts_at, r.join_ends_at, r.closes_at, r.room_status,
+            u.nickname AS creator_nickname, COUNT(p.id) AS participant_count
+     FROM rooms r JOIN users u ON u.id = r.creator_id
+     LEFT JOIN room_participants p ON p.room_id = r.id
+     GROUP BY r.id ORDER BY r.created_at DESC LIMIT ?`,
+  ).bind(listLimit(request)).all();
+  return json({ rooms: result.results ?? [] });
+}
+
+export async function listAdminVisits(request: Request, env: Env): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const result = await env.DB.prepare(
+    `SELECT v.id, v.room_id, r.name AS room_name, visitor.nickname AS visitor_nickname,
+            target.nickname AS target_nickname, v.visited_at
+     FROM visits v JOIN rooms r ON r.id = v.room_id
+     JOIN users visitor ON visitor.id = v.visitor_id JOIN users target ON target.id = v.target_id
+     ORDER BY v.visited_at DESC LIMIT ?`,
+  ).bind(listLimit(request)).all();
+  return json({ visits: result.results ?? [] });
+}
+
+export async function listAdminPenalties(request: Request, env: Env): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const result = await env.DB.prepare(
+    `SELECT p.id, p.room_id, r.name AS room_name, u.id AS user_id, u.nickname, p.reason, p.status,
+            p.issued_at, p.resolved_at, p.locked_at
+     FROM penalties p JOIN rooms r ON r.id = p.room_id JOIN users u ON u.id = p.user_id
+     ORDER BY p.issued_at DESC LIMIT ?`,
+  ).bind(listLimit(request)).all();
+  return json({ penalties: result.results ?? [] });
+}
+
+export async function listAdminReports(request: Request, env: Env): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const result = await env.DB.prepare(
+    `SELECT report.id, report.room_id, room.name AS room_name, reporter.nickname AS reporter_nickname,
+            target.nickname AS target_nickname, report.reason, report.report_status, report.created_at,
+            report.resolved_at, resolver.nickname AS resolved_by_nickname
+     FROM reports report JOIN users reporter ON reporter.id = report.reporter_id
+     JOIN users target ON target.id = report.target_id LEFT JOIN rooms room ON room.id = report.room_id
+     LEFT JOIN users resolver ON resolver.id = report.resolved_by
+     ORDER BY report.created_at DESC LIMIT ?`,
+  ).bind(listLimit(request)).all();
+  return json({ reports: result.results ?? [] });
+}
+
+export async function listAuditLogs(request: Request, env: Env): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const result = await env.DB.prepare(
+    `SELECT log.id, actor.nickname AS actor_nickname, log.event_type, log.target_type, log.target_id,
+            log.metadata_json, log.created_at
+     FROM audit_logs log LEFT JOIN users actor ON actor.id = log.actor_id
+     ORDER BY log.created_at DESC LIMIT ?`,
+  ).bind(listLimit(request)).all();
+  return json({ logs: result.results ?? [] });
+}
+
+export async function updateReportStatus(request: Request, env: Env, reportId: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const body = await requestBody(request);
+  if (!body) return error("invalid_json", 400);
+  const reportStatus = stringValue(body, "reportStatus");
+  if (!ALLOWED_REPORT_STATUSES.has(reportStatus)) return error("invalid_report_status", 400);
+  const report = await env.DB.prepare("SELECT id, report_status FROM reports WHERE id = ?").bind(reportId)
+    .first<{ id: string; report_status: string }>();
+  if (!report) return error("report_not_found", 404);
+  if (report.report_status !== "pending") return error("report_already_handled", 409);
+  const now = Date.now();
+  await env.DB.batch([
+    env.DB.prepare("UPDATE reports SET report_status = ?, resolved_at = ?, resolved_by = ? WHERE id = ?")
+      .bind(reportStatus, now, admin.id, reportId),
+    env.DB.prepare(
+      "INSERT INTO audit_logs (id, actor_id, event_type, target_type, target_id, metadata_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).bind(crypto.randomUUID(), admin.id, "report_status_changed", "report", reportId, JSON.stringify({ from: report.report_status, to: reportStatus }), now),
+  ]);
+  return json({ id: reportId, reportStatus, resolvedAt: now, resolvedBy: admin.id });
 }

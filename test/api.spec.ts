@@ -184,3 +184,33 @@ describe("member dashboard API", () => {
     expect(stored).toEqual({ reporter_id: reporter.userId, target_id: target.userId, room_id: roomId });
   });
 });
+
+describe("administrator operations API", () => {
+  it("limits operational history to administrators and lets them close a report", async () => {
+    const admin = await createApprovedSession("admin");
+    const reporter = await createApprovedSession("report-source");
+    const target = await createApprovedSession("report-target");
+    await env.DB.prepare("INSERT INTO user_roles (user_id, role, granted_at) VALUES (?, 'admin', ?)")
+      .bind(admin.userId, Date.now())
+      .run();
+    const reportId = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO reports (id, reporter_id, target_id, reason, created_at) VALUES (?, ?, ?, ?, ?)",
+    ).bind(reportId, reporter.userId, target.userId, "관리자 검토 테스트", Date.now()).run();
+
+    const forbidden = await api("/api/admin/reports", { headers: { Cookie: reporter.cookie } });
+    expect(forbidden.status).toBe(403);
+    const reports = await api("/api/admin/reports", { headers: { Cookie: admin.cookie } });
+    expect(reports.status).toBe(200);
+    const listed = await reports.json<{ reports: Array<{ id: string; report_status: string }> }>();
+    expect(listed.reports).toContainEqual(expect.objectContaining({ id: reportId, report_status: "pending" }));
+
+    const resolved = await api(`/api/admin/reports/${reportId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Cookie: admin.cookie },
+      body: JSON.stringify({ reportStatus: "resolved" }),
+    });
+    expect(resolved.status).toBe(200);
+    expect(await resolved.json()).toMatchObject({ id: reportId, reportStatus: "resolved", resolvedBy: admin.userId });
+  });
+});
