@@ -10,7 +10,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply blog-poom --remote",
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "start:ec2": "tsx server/index.ts"
+    "start:ec2": "tsx server/index.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.1.10",

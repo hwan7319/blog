@@ -23,6 +23,10 @@ The production database ID remains intentionally unset in this repository until 
 
 The EC2 deployment uses `docker-compose.yml`. It stores `data/blog-poom.sqlite` on the host volume, enables SQLite WAL mode, runs schema migrations on startup, and writes a consistent backup under `data/backups/` at 00:10 KST every day. Configure EBS snapshots separately in AWS to protect the whole volume.
 
+### Demo seed data
+
+Run `npm run seed:demo` in the app container to add four approved demo members, three rooms in different states, a visit, an unresolved penalty, a pending report, and an audit log. It is idempotent and preserves real accounts. The default demo password is `demo-pass-2026`; override it with `DEMO_PASSWORD` when running the command.
+
 ## Authentication API
 
 - `POST /api/auth/signup` creates a pending user.
