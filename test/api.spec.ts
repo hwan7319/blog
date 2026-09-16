@@ -145,3 +145,42 @@ describe("room API", () => {
     expect(penalties.results).toEqual([{ user_id: second.userId }]);
   });
 });
+
+describe("member dashboard API", () => {
+  it("returns the signed-in member's activity and records a report", async () => {
+    const reporter = await createApprovedSession("reporter");
+    const target = await createApprovedSession("reported");
+    const roomId = crypto.randomUUID();
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO rooms (id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, missions_json, created_at)
+         VALUES (?, ?, 'keyword', ?, 2, ?, ?, ?, '["공감"]', ?)`,
+      ).bind(roomId, "Dashboard test room", reporter.userId, now - 60_000, now + 60_000, now + 120_000, now),
+      env.DB.prepare(
+        "INSERT INTO room_participants (id, room_id, user_id, keyword, joined_at) VALUES (?, ?, ?, ?, ?)",
+      ).bind(crypto.randomUUID(), roomId, reporter.userId, "reporter", now),
+    ]);
+
+    const participation = await api("/api/me/participations", { headers: { Cookie: reporter.cookie } });
+    expect(participation.status).toBe(200);
+    expect(await participation.json()).toMatchObject({ participations: [{ roomId, status: "waiting" }] });
+
+    const activity = await api("/api/me/activity", { headers: { Cookie: reporter.cookie } });
+    expect(activity.status).toBe(200);
+    const { days } = await activity.json<{ days: Record<string, number> }>();
+    expect(Object.keys(days)).toHaveLength(7);
+    expect(Object.values(days).reduce((sum, count) => sum + count, 0)).toBe(1);
+
+    const report = await api("/api/reports", jsonRequest({
+      targetUserId: target.userId,
+      roomId,
+      reason: "미션을 이행하지 않았습니다.",
+    }, reporter.cookie));
+    expect(report.status).toBe(201);
+    const stored = await env.DB.prepare("SELECT reporter_id, target_id, room_id FROM reports WHERE reporter_id = ?")
+      .bind(reporter.userId)
+      .first<{ reporter_id: string; target_id: string; room_id: string }>();
+    expect(stored).toEqual({ reporter_id: reporter.userId, target_id: target.userId, room_id: roomId });
+  });
+});

@@ -2,6 +2,7 @@ import { adminMe, json, login, logout, me, signup } from "./auth";
 import { bootstrapAdmin, listUsers, updateAccountStatus } from "./admin";
 import { createRoom, deleteRoom, getRoom, joinRoom, listRooms } from "./rooms";
 import { closeExpiredRooms, getParticipants, lockOverduePenalties, releasePenalty, reportParticipant, visitParticipant } from "./activity";
+import { createReport, myParticipations, myPenalties, weeklyActivity } from "./dashboard";
 
 export interface Env {
   DB: D1Database;
@@ -27,6 +28,10 @@ export default {
     if (request.method === "GET" && url.pathname === "/api/auth/me") return me(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/me") return adminMe(request, env);
     if (request.method === "POST" && url.pathname === "/api/auth/bootstrap-admin") return bootstrapAdmin(request, env);
+    if (request.method === "GET" && url.pathname === "/api/me/participations") return myParticipations(request, env);
+    if (request.method === "GET" && url.pathname === "/api/me/activity") return weeklyActivity(request, env);
+    if (request.method === "GET" && url.pathname === "/api/me/penalties") return myPenalties(request, env);
+    if (request.method === "POST" && url.pathname === "/api/reports") return createReport(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/users") return listUsers(request, env);
     if (request.method === "GET" && url.pathname === "/api/rooms") return listRooms(request, env);
     if (request.method === "POST" && url.pathname === "/api/rooms") return createRoom(request, env);

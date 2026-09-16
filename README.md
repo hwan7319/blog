@@ -49,4 +49,11 @@ An authenticated administrator can then use:
 
 The one-minute scheduled job closes expired rooms, rechecks actual visits, marks completed participants, and creates automatic incomplete penalties. The daily job locks accounts whose unresolved penalties are at least two days old.
 
+## My page and reports
+
+- `GET /api/me/participations` lists a member's rooms and completion state.
+- `GET /api/me/activity` returns service-day participation counts.
+- `GET /api/me/penalties` returns both unresolved and resolved penalties.
+- `POST /api/reports` creates an administrator-review report. A room-specific report requires the reporter to have participated in that room.
+
 The initial migration establishes the relational schema. Room workflows, scheduled closure, the existing frontend migration, and Google Sheets data import follow in separate changes.
