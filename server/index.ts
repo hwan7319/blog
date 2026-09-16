@@ -65,6 +65,15 @@ const database = new Database(path.join(dataDirectory, "blog-poom.sqlite"));
 database.pragma("foreign_keys = ON");
 database.pragma("journal_mode = WAL");
 applyMigrations(database);
+const backupDirectory = path.join(dataDirectory, "backups");
+if (!existsSync(backupDirectory)) mkdirSync(backupDirectory, { recursive: true });
+
+async function backupDatabase(): Promise<void> {
+  const day = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+  await database.backup(path.join(backupDirectory, `blog-poom-${day}.sqlite`));
+}
 const env = { DB: new SqliteD1(database), BOOTSTRAP_ADMIN_SECRET: process.env.BOOTSTRAP_ADMIN_SECRET } as unknown as Env;
 
 const app = express();
@@ -83,5 +92,6 @@ app.use((error: Error, _request: express.Request, response: express.Response, _n
 
 cron.schedule("* * * * *", () => void closeExpiredRooms(env).catch(console.error));
 cron.schedule("0 0 * * *", () => void lockOverduePenalties(env).catch(console.error), { timezone: "Asia/Seoul" });
+cron.schedule("10 0 * * *", () => void backupDatabase().catch(console.error), { timezone: "Asia/Seoul" });
 const port = Number(process.env.PORT ?? 3000);
 app.listen(port, "0.0.0.0", () => console.log(`blog-poom listening on ${port}`));

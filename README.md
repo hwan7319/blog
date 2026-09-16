@@ -19,6 +19,10 @@ Cloudflare Workers and D1 backend for the blog mutual-support platform.
 
 The production database ID remains intentionally unset in this repository until the Cloudflare account is authenticated.
 
+## EC2 deployment
+
+The EC2 deployment uses `docker-compose.yml`. It stores `data/blog-poom.sqlite` on the host volume, enables SQLite WAL mode, runs schema migrations on startup, and writes a consistent backup under `data/backups/` at 00:10 KST every day. Configure EBS snapshots separately in AWS to protect the whole volume.
+
 ## Authentication API
 
 - `POST /api/auth/signup` creates a pending user.
