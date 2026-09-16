@@ -1,5 +1,6 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
 import { bootstrapAdmin, listUsers, updateAccountStatus } from "./admin";
+import { createRoom, deleteRoom, getRoom, joinRoom, listRooms } from "./rooms";
 
 export interface Env {
   DB: D1Database;
@@ -26,9 +27,18 @@ export default {
     if (request.method === "GET" && url.pathname === "/api/admin/me") return adminMe(request, env);
     if (request.method === "POST" && url.pathname === "/api/auth/bootstrap-admin") return bootstrapAdmin(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/users") return listUsers(request, env);
+    if (request.method === "GET" && url.pathname === "/api/rooms") return listRooms(request, env);
+    if (request.method === "POST" && url.pathname === "/api/rooms") return createRoom(request, env);
 
     const accountStatusMatch = url.pathname.match(/^\/api\/admin\/users\/([0-9a-f-]{36})\/account-status$/i);
     if (request.method === "PATCH" && accountStatusMatch) return updateAccountStatus(request, env, accountStatusMatch[1]);
+
+    const roomMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})$/i);
+    if (roomMatch && request.method === "GET") return getRoom(request, env, roomMatch[1]);
+    if (roomMatch && request.method === "DELETE") return deleteRoom(request, env, roomMatch[1]);
+
+    const joinMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})\/participants$/i);
+    if (joinMatch && request.method === "POST") return joinRoom(request, env, joinMatch[1]);
 
     return json({ error: "not_found" }, { status: 404 });
   },

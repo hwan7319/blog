@@ -145,6 +145,10 @@ export async function currentUser(request: Request, env: Env): Promise<PublicUse
   return publicUser(env, session);
 }
 
+export async function requireUser(request: Request, env: Env): Promise<PublicUser | Response> {
+  return (await currentUser(request, env)) ?? error("authentication_required", 401);
+}
+
 export async function signup(request: Request, env: Env): Promise<Response> {
   const body = await requestBody(request);
   if (!body) return error("invalid_json", 400);

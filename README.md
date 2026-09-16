@@ -32,4 +32,12 @@ An authenticated administrator can then use:
 - `GET /api/admin/users?status=pending`
 - `PATCH /api/admin/users/:userId/account-status` with `approved`, `rejected`, or `locked`
 
+## Room API
+
+- `GET /api/rooms?type=keyword` lists rooms in the current Korean service day, which starts at 04:00 KST.
+- `POST /api/rooms` creates a keyword or link room for an approved member without unresolved penalties.
+- `GET /api/rooms/:roomId` returns a room preview.
+- `POST /api/rooms/:roomId/participants` joins an open room. The server enforces room start time, capacity, and one participation per member.
+- `DELETE /api/rooms/:roomId` is available only to the creator before anybody has joined.
+
 The initial migration establishes the relational schema. Room workflows, scheduled closure, the existing frontend migration, and Google Sheets data import follow in separate changes.
