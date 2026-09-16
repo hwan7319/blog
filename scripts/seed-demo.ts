@@ -14,7 +14,7 @@ const password = process.env.DEMO_PASSWORD ?? "demo-pass-2026";
 function base64Url(bytes: Buffer): string { return bytes.toString("base64").replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, ""); }
 function passwordHash(value: string): string {
   const salt = randomBytes(16);
-  return `pbkdf2_sha256$210000$${base64Url(salt)}$${base64Url(pbkdf2Sync(value, salt, 32, 210000, "sha256"))}`;
+  return `pbkdf2_sha256$210000$${base64Url(salt)}$${base64Url(pbkdf2Sync(value, salt, 210000, 32, "sha256"))}`;
 }
 
 const members = [
@@ -29,10 +29,13 @@ const closedRoom = "20000000-0000-4000-8000-000000000003";
 
 database.transaction(() => {
   for (const [id, nickname, blogUrl, blogName] of members) {
+    const hash = passwordHash(password);
     database.prepare(
       `INSERT OR IGNORE INTO users (id, nickname, password_hash, blog_url, blog_name, account_status, approved_at, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, 'approved', ?, ?, ?)`,
-    ).run(id, nickname, passwordHash(password), blogUrl, blogName, now - 7 * 24 * hour, now - 7 * 24 * hour, now);
+    ).run(id, nickname, hash, blogUrl, blogName, now - 7 * 24 * hour, now - 7 * 24 * hour, now);
+    database.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?")
+      .run(hash, now, id);
   }
   database.prepare(
     `INSERT OR IGNORE INTO rooms (id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, missions_json, room_status, created_at)
