@@ -1,5 +1,5 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
-import { bootstrapAdmin, listAdminPenalties, listAdminReports, listAdminRooms, listAdminVisits, listAuditLogs, listUsers, updateAccountStatus, updateReportStatus } from "./admin";
+import { bootstrapAdmin, databaseOverview, listAdminPenalties, listAdminReports, listAdminRooms, listAdminVisits, listAuditLogs, listDatabaseTable, listUsers, updateAccountStatus, updateReportStatus } from "./admin";
 import { createRoom, deleteRoom, getRoom, joinRoom, listRooms } from "./rooms";
 import { closeExpiredRooms, getParticipants, lockOverduePenalties, releasePenalty, reportParticipant, visitParticipant } from "./activity";
 import { createReport, myParticipations, myPenalties, weeklyActivity } from "./dashboard";
@@ -39,6 +39,7 @@ export default {
     if (request.method === "GET" && url.pathname === "/api/admin/penalties") return listAdminPenalties(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/reports") return listAdminReports(request, env);
     if (request.method === "GET" && url.pathname === "/api/admin/audit-logs") return listAuditLogs(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/database/overview") return databaseOverview(request, env);
     if (request.method === "GET" && url.pathname === "/api/rooms") return listRooms(request, env);
     if (request.method === "POST" && url.pathname === "/api/rooms") return createRoom(request, env);
 
@@ -47,6 +48,9 @@ export default {
 
     const reportStatusMatch = url.pathname.match(/^\/api\/admin\/reports\/([0-9a-f-]{36})\/status$/i);
     if (request.method === "PATCH" && reportStatusMatch) return updateReportStatus(request, env, reportStatusMatch[1]);
+
+    const databaseTableMatch = url.pathname.match(/^\/api\/admin\/database\/([a-z_]+)$/i);
+    if (request.method === "GET" && databaseTableMatch) return listDatabaseTable(request, env, databaseTableMatch[1]);
 
     const roomMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})$/i);
     if (roomMatch && request.method === "GET") return getRoom(request, env, roomMatch[1]);

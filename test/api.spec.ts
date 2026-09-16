@@ -205,6 +205,10 @@ describe("administrator operations API", () => {
     const listed = await reports.json<{ reports: Array<{ id: string; report_status: string }> }>();
     expect(listed.reports).toContainEqual(expect.objectContaining({ id: reportId, report_status: "pending" }));
 
+    const overview = await api("/api/admin/database/overview", { headers: { Cookie: admin.cookie } });
+    expect(overview.status).toBe(200);
+    expect(await overview.json()).toMatchObject({ tables: expect.arrayContaining([expect.objectContaining({ name: "users" })]) });
+
     const resolved = await api(`/api/admin/reports/${reportId}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Cookie: admin.cookie },

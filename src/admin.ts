@@ -13,6 +13,8 @@ type UserListRow = {
 
 const ALLOWED_ACCOUNT_STATUSES = new Set(["approved", "rejected", "locked"]);
 const ALLOWED_REPORT_STATUSES = new Set(["resolved", "dismissed"]);
+const DATABASE_TABLES = ["users", "rooms", "participants", "visits", "penalties", "reports", "audit_logs"] as const;
+type DatabaseTable = typeof DATABASE_TABLES[number];
 
 function isResponse(value: PublicUser | Response): value is Response {
   return value instanceof Response;
@@ -200,4 +202,36 @@ export async function updateReportStatus(request: Request, env: Env, reportId: s
     ).bind(crypto.randomUUID(), admin.id, "report_status_changed", "report", reportId, JSON.stringify({ from: report.report_status, to: reportStatus }), now),
   ]);
   return json({ id: reportId, reportStatus, resolvedAt: now, resolvedBy: admin.id });
+}
+
+export async function databaseOverview(request: Request, env: Env): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const sourceTables: Record<DatabaseTable, string> = {
+    users: "users", rooms: "rooms", participants: "room_participants", visits: "visits",
+    penalties: "penalties", reports: "reports", audit_logs: "audit_logs",
+  };
+  const counts = await Promise.all(DATABASE_TABLES.map(async (name) => {
+    const row = await env.DB.prepare(`SELECT COUNT(*) AS count FROM ${sourceTables[name]}`).first<{ count: number }>();
+    return { name, count: row?.count ?? 0 };
+  }));
+  return json({ tables: counts });
+}
+
+export async function listDatabaseTable(request: Request, env: Env, table: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  if (!DATABASE_TABLES.includes(table as DatabaseTable)) return error("database_table_not_found", 404);
+  const limit = listLimit(request);
+  const statements: Record<DatabaseTable, string> = {
+    users: "SELECT id, legacy_user_id, nickname, blog_url, blog_name, account_status, approved_at, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT ?",
+    rooms: "SELECT id, legacy_room_id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, room_status, closed_at, created_at FROM rooms ORDER BY created_at DESC LIMIT ?",
+    participants: "SELECT id, legacy_participant_id, room_id, user_id, keyword, link_url, joined_at, completed_at FROM room_participants ORDER BY joined_at DESC LIMIT ?",
+    visits: "SELECT id, legacy_visit_id, room_id, visitor_id, target_id, visited_at FROM visits ORDER BY visited_at DESC LIMIT ?",
+    penalties: "SELECT id, legacy_penalty_id, user_id, room_id, reason, status, issued_at, resolved_at, locked_at FROM penalties ORDER BY issued_at DESC LIMIT ?",
+    reports: "SELECT id, legacy_report_id, reporter_id, target_id, room_id, reason, report_status, created_at, resolved_at, resolved_by FROM reports ORDER BY created_at DESC LIMIT ?",
+    audit_logs: "SELECT id, legacy_log_id, actor_id, event_type, target_type, target_id, metadata_json, created_at FROM audit_logs ORDER BY created_at DESC LIMIT ?",
+  };
+  const rows = await env.DB.prepare(statements[table as DatabaseTable]).bind(limit).all<Record<string, unknown>>();
+  return json({ table, rows: rows.results ?? [] });
 }
