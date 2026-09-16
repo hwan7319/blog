@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>품앗이</title>
+  <style>
+    :root { --ink:#17231f; --muted:#66756e; --line:#dce6e1; --surface:#fff; --page:#f4f8f6; --main:#0b8a63; --danger:#c93f3f; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--page); color:var(--ink); font:15px system-ui,-apple-system,"Malgun Gothic",sans-serif; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:18px max(20px,calc((100% - 840px)/2)); background:#fff; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:20px; } h1 small { display:block; color:var(--muted); font-size:12px; font-weight:400; margin-top:3px; }
+    main { max-width:840px; margin:0 auto; padding:18px 16px 90px; }
+    nav { display:flex; gap:8px; margin-bottom:14px; } button { cursor:pointer; font:inherit; }
+    .tab,.secondary { background:#fff; border:1px solid var(--line); border-radius:10px; color:var(--ink); padding:9px 12px; }
+    .tab.active { border-color:var(--main); color:var(--main); font-weight:700; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:12px; }
+    .card h2 { font-size:16px; margin:0 0 14px; } .hidden { display:none !important; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } label { display:block; color:var(--muted); font-size:13px; }
+    input,select { width:100%; margin-top:5px; padding:10px; border:1px solid var(--line); border-radius:9px; font:inherit; background:#fff; }
+    .primary { border:0; background:var(--main); color:#fff; padding:11px 15px; border-radius:10px; font-weight:700; }
+    .danger { color:var(--danger); } .message { margin-bottom:12px; border-radius:10px; padding:12px; background:#e8f7f1; color:#096544; } .message.error { background:#fceaea; color:#a62f2f; }
+    .room { border-top:1px solid var(--line); padding:14px 0; } .room:first-child { border-top:0; padding-top:0; }
+    .room strong { display:block; } .meta { color:var(--muted); font-size:13px; margin:5px 0 10px; line-height:1.5; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .spacer { flex:1; } .badge { background:#e8f7f1; color:#096544; border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; }
+    .badge.waiting { background:#fff4dc; color:#996400; } .badge.closed,.badge.deleted { background:#eef1f0; color:#637068; }
+    .empty { color:var(--muted); text-align:center; padding:24px; } .notice { color:var(--muted); font-size:13px; line-height:1.6; }
+    @media (max-width:560px) { .grid { grid-template-columns:1fr; } header { padding:14px 16px; } }
+  </style>
+</head>
+<body>
+  <header><h1>품앗이 🌸<small>블로그 상호 방문 모임</small></h1><div id="account"></div></header>
+  <main>
+    <div id="message"></div>
+    <section id="auth" class="card">
+      <div class="row"><button class="tab active" data-auth="login">로그인</button><button class="tab" data-auth="signup">회원가입</button></div>
+      <form id="login-form"><h2>로그인</h2><label>닉네임<input name="nickname" required></label><label>비밀번호<input name="password" type="password" required></label><p><button class="primary">로그인</button></p></form>
+      <form id="signup-form" class="hidden"><h2>가입 신청</h2><div class="grid"><label>닉네임<input name="nickname" required></label><label>비밀번호<input name="password" type="password" required minlength="8"></label></div><label>블로그 주소<input name="blogUrl" type="url" placeholder="https://blog.naver.com/..." required></label><label>블로그명<input name="blogName" required></label><p class="notice">가입 후 운영자 승인까지 로그인이 제한됩니다.</p><button class="primary">가입 신청하기</button></form>
+    </section>
+    <section id="app" class="hidden">
+      <nav><button class="tab active" data-page="rooms">방 목록</button><button class="tab" data-page="create">방 만들기</button><button class="tab" data-page="me">마이</button></nav>
+      <section id="page-rooms"><div class="card"><div class="row"><h2 class="spacer">오늘의 방</h2><select id="room-type" style="width:auto;margin:0"><option value="keyword">키워드방</option><option value="link">링크방</option></select></div><div id="rooms"></div></div></section>
+      <section id="page-create" class="hidden"><form id="room-form" class="card"><h2>품앗이방 만들기</h2><div class="grid"><label>유형<select name="type" id="create-type"><option value="keyword">키워드방</option><option value="link">링크방</option></select></label><label>시작 시각<input name="startAt" type="datetime-local" required></label><label>모집 인원<input name="capacity" type="number" min="1" value="5" required></label><label>방 이름<input name="name" placeholder="비우면 자동 생성"></label></div><label>미션<select name="missions" multiple required size="3"><option value="공감">공감</option><option value="댓글">댓글</option><option value="스크랩">스크랩</option></select></label><p id="link-duration" class="grid hidden"><label>대기 시간(분)<input name="waitMinutes" type="number" min="1" value="15"></label><label>진행 시간(분)<input name="progressMinutes" type="number" min="1" value="15"></label></p><p class="notice" id="keyword-note">키워드방은 대기 15분과 진행 15분으로 고정됩니다.</p><button class="primary">방 만들기</button></form></section>
+      <section id="page-me" class="hidden"><div class="card"><h2>최근 7일 활동</h2><div id="activity" class="notice"></div></div><div class="card"><h2>참여한 방</h2><div id="participations"></div></div><div class="card"><h2>패널티</h2><div id="penalties"></div></div></section>
+    </section>
+  </main>
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const api = async (path, options = {}) => {
+      const response = await fetch(path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json', ...(options.headers || {}) }, ...options });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'request_failed');
+      return data;
+    };
+    const errorText = { invalid_credentials:'닉네임 또는 비밀번호가 맞지 않습니다.', account_pending:'운영자 승인을 기다리고 있습니다.', account_rejected:'가입 신청이 반려되었습니다.', account_locked:'계정이 잠겨 있습니다.', account_not_approved:'승인된 회원만 이용할 수 있습니다.', unresolved_penalty:'미해결 패널티가 있어 이용할 수 없습니다.', room_full:'방 정원이 찼습니다.', room_not_started:'아직 참여 시간이 아닙니다.', room_join_closed:'참여 시간이 종료되었습니다.' };
+    function message(text, isError = false) { $('#message').innerHTML = text ? `<div class="message ${isError ? 'error' : ''}">${text}</div>` : ''; }
+    function formatTime(timestamp) { return new Date(timestamp).toLocaleString('ko-KR',{ month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit' }); }
+    function statusLabel(status) { return ({ waiting:'모집 중', in_progress:'진행 중', closed:'종료', deleted:'삭제' })[status] || status; }
+    let currentUser = null;
+    async function bootstrap() { try { const { user } = await api('/api/auth/me'); currentUser = user; showApp(); } catch { $('#auth').classList.remove('hidden'); } }
+    function showApp() { $('#auth').classList.add('hidden'); $('#app').classList.remove('hidden'); $('#account').innerHTML = `<span>${currentUser.nickname}님 </span><button class="secondary" id="logout">로그아웃</button>`; $('#logout').onclick = async () => { await api('/api/auth/logout',{method:'POST'}); location.reload(); }; loadRooms(); }
+    document.querySelectorAll('[data-auth]').forEach(button => button.onclick = () => { document.querySelectorAll('[data-auth]').forEach(item => item.classList.toggle('active',item === button)); $('#login-form').classList.toggle('hidden',button.dataset.auth !== 'login'); $('#signup-form').classList.toggle('hidden',button.dataset.auth !== 'signup'); });
+    $('#login-form').onsubmit = async (event) => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.target)); try { const result = await api('/api/auth/login',{method:'POST',body:JSON.stringify(data)}); currentUser = result.user; showApp(); message('로그인했습니다.'); } catch (error) { message(errorText[error.message] || '로그인에 실패했습니다.',true); } };
+    $('#signup-form').onsubmit = async (event) => { event.preventDefault(); try { await api('/api/auth/signup',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(event.target)))}); message('가입 신청이 접수되었습니다. 운영자 승인 후 로그인할 수 있습니다.'); event.target.reset(); } catch (error) { message(error.message === 'nickname_taken' ? '이미 사용 중인 닉네임입니다.' : '가입 신청에 실패했습니다.',true); } };
+    document.querySelectorAll('[data-page]').forEach(button => button.onclick = () => { document.querySelectorAll('[data-page]').forEach(item => item.classList.toggle('active',item === button)); ['rooms','create','me'].forEach(page => $('#page-'+page).classList.toggle('hidden',page !== button.dataset.page)); if (button.dataset.page === 'rooms') loadRooms(); if (button.dataset.page === 'me') loadMe(); });
+    async function loadRooms() { const type = $('#room-type').value; $('#rooms').innerHTML = '<p class="notice">불러오는 중...</p>'; try { const { rooms } = await api('/api/rooms?type='+type); $('#rooms').innerHTML = rooms.length ? rooms.map(room => `<article class="room"><div class="row"><strong>${escapeHtml(room.name)}</strong><span class="badge ${room.status}">${statusLabel(room.status)}</span></div><div class="meta">${room.type === 'keyword' ? '키워드' : '링크'} · ${room.participantCount}/${room.capacity}명 · ${room.missions.join(', ')}<br>참여 ${formatTime(room.joinStartsAt)} ~ ${formatTime(room.joinEndsAt)}</div><button class="primary join" data-id="${room.id}" data-type="${room.type}" ${room.isFull || room.status !== 'waiting' ? 'disabled' : ''}>참여하기</button></article>`).join('') : '<p class="empty">현재 열려 있는 방이 없습니다.</p>'; document.querySelectorAll('.join').forEach(button => button.onclick = () => joinRoom(button.dataset.id,button.dataset.type)); } catch { $('#rooms').innerHTML = '<p class="empty">방을 불러오지 못했습니다.</p>'; } }
+    $('#room-type').onchange = loadRooms;
+    async function joinRoom(roomId,type) { const value = prompt(type === 'keyword' ? '검색할 키워드를 입력하세요.' : '내 게시글 링크를 입력하세요.'); if (!value) return; try { await api(`/api/rooms/${roomId}/participants`,{method:'POST',body:JSON.stringify(type === 'keyword' ? { keyword:value } : { linkUrl:value })}); message('방에 참여했습니다.'); loadRooms(); } catch (error) { message(errorText[error.message] || '방 참여에 실패했습니다.',true); } }
+    $('#create-type').onchange = (event) => { const link = event.target.value === 'link'; $('#link-duration').classList.toggle('hidden',!link); $('#keyword-note').classList.toggle('hidden',link); };
+    $('#room-form').onsubmit = async (event) => { event.preventDefault(); const form = new FormData(event.target); const selected = [...event.target.elements.missions.selectedOptions].map(option => option.value); const startAt = new Date(form.get('startAt')).getTime(); const body = { type:form.get('type'), startAt, capacity:Number(form.get('capacity')), name:form.get('name'), missions:selected }; if (body.type === 'link') { body.waitMinutes = Number(form.get('waitMinutes')); body.progressMinutes = Number(form.get('progressMinutes')); } try { await api('/api/rooms',{method:'POST',body:JSON.stringify(body)}); message('방을 만들었습니다.'); document.querySelector('[data-page="rooms"]').click(); } catch (error) { message(errorText[error.message] || '방 생성에 실패했습니다.',true); } };
+    async function loadMe() { try { const [activity,participations,penalties] = await Promise.all([api('/api/me/activity'),api('/api/me/participations'),api('/api/me/penalties')]); $('#activity').innerHTML = Object.entries(activity.days).map(([day,count]) => `${day}: <strong>${count}회</strong>`).join(' &nbsp; '); $('#participations').innerHTML = participations.participations.length ? participations.participations.map(room => `<article class="room"><strong>${escapeHtml(room.roomName)}</strong><div class="meta">${room.value || ''} · ${statusLabel(room.status)} · ${formatTime(room.joinedAt)}</div></article>`).join('') : '<p class="empty">참여 기록이 없습니다.</p>'; $('#penalties').innerHTML = penalties.penalties.length ? penalties.penalties.map(item => `<article class="room"><strong>${escapeHtml(item.roomName)}</strong><div class="meta">${escapeHtml(item.reason)} · ${item.status}</div></article>`).join('') : '<p class="empty">패널티가 없습니다.</p>'; } catch { message('마이 페이지를 불러오지 못했습니다.',true); } }
+    function escapeHtml(value) { const element = document.createElement('span'); element.textContent = value || ''; return element.innerHTML; }
+    bootstrap();
+  </script>
+</body>
+</html>

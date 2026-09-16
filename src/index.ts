@@ -6,6 +6,7 @@ import { createReport, myParticipations, myPenalties, weeklyActivity } from "./d
 
 export interface Env {
   DB: D1Database;
+  ASSETS?: Fetcher;
   BOOTSTRAP_ADMIN_SECRET?: string;
 }
 
@@ -56,6 +57,8 @@ export default {
     const penaltyMatch = url.pathname.match(/^\/api\/penalties\/([0-9a-f-]{36})\/resolve$/i);
     if (penaltyMatch && request.method === "POST") return releasePenalty(request, env, penaltyMatch[1]);
 
+    if (url.pathname.startsWith("/api/")) return json({ error: "not_found" }, { status: 404 });
+    if (env.ASSETS) return env.ASSETS.fetch(request);
     return json({ error: "not_found" }, { status: 404 });
   },
 
