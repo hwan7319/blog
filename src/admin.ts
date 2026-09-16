@@ -1,5 +1,5 @@
 import type { Env } from "./index";
-import { error, json, PublicUser, requestBody, requireAdmin, stringValue } from "./auth";
+import { error, json, passwordHash, PublicUser, requestBody, requireAdmin, stringValue } from "./auth";
 
 type UserListRow = {
   id: string;
@@ -15,6 +15,16 @@ const ALLOWED_ACCOUNT_STATUSES = new Set(["approved", "rejected", "locked"]);
 const ALLOWED_REPORT_STATUSES = new Set(["resolved", "dismissed"]);
 const DATABASE_TABLES = ["users", "rooms", "participants", "visits", "penalties", "reports", "audit_logs"] as const;
 type DatabaseTable = typeof DATABASE_TABLES[number];
+type DatabaseDefinition = { source: string; columns: readonly string[]; required: readonly string[]; defaults: () => Record<string, unknown> };
+const DATABASE_DEFINITIONS: Record<DatabaseTable, DatabaseDefinition> = {
+  users: { source: "users", columns: ["nickname", "password_hash", "blog_url", "blog_name", "account_status", "approved_at", "created_at", "updated_at"], required: ["nickname", "password", "blog_url", "blog_name"], defaults: () => ({ created_at: Date.now(), updated_at: Date.now(), account_status: "pending" }) },
+  rooms: { source: "rooms", columns: ["name", "room_type", "creator_id", "capacity", "join_starts_at", "join_ends_at", "closes_at", "missions_json", "room_status", "closed_at", "deleted_at", "created_at"], required: ["name", "room_type", "creator_id", "capacity", "join_starts_at", "join_ends_at", "closes_at", "missions_json"], defaults: () => ({ created_at: Date.now(), room_status: "waiting" }) },
+  participants: { source: "room_participants", columns: ["room_id", "user_id", "keyword", "link_url", "joined_at", "completed_at"], required: ["room_id", "user_id"], defaults: () => ({ joined_at: Date.now() }) },
+  visits: { source: "visits", columns: ["room_id", "visitor_id", "target_id", "visited_at"], required: ["room_id", "visitor_id", "target_id"], defaults: () => ({ visited_at: Date.now() }) },
+  penalties: { source: "penalties", columns: ["user_id", "room_id", "reason", "status", "issued_at", "resolved_at", "locked_at"], required: ["user_id", "room_id", "reason"], defaults: () => ({ issued_at: Date.now(), status: "unresolved" }) },
+  reports: { source: "reports", columns: ["reporter_id", "target_id", "room_id", "reason", "report_status", "created_at", "resolved_at", "resolved_by"], required: ["reporter_id", "target_id", "reason"], defaults: () => ({ created_at: Date.now(), report_status: "pending" }) },
+  audit_logs: { source: "audit_logs", columns: ["actor_id", "event_type", "target_type", "target_id", "metadata_json", "created_at"], required: ["event_type"], defaults: () => ({ metadata_json: "{}", created_at: Date.now() }) },
+};
 
 function isResponse(value: PublicUser | Response): value is Response {
   return value instanceof Response;
@@ -234,4 +244,92 @@ export async function listDatabaseTable(request: Request, env: Env, table: strin
   };
   const rows = await env.DB.prepare(statements[table as DatabaseTable]).bind(limit).all<Record<string, unknown>>();
   return json({ table, rows: rows.results ?? [] });
+}
+
+function databaseDefinition(table: string): DatabaseDefinition | null {
+  return DATABASE_TABLES.includes(table as DatabaseTable) ? DATABASE_DEFINITIONS[table as DatabaseTable] : null;
+}
+
+async function databaseValues(table: DatabaseTable, input: Record<string, unknown>, creating: boolean): Promise<Record<string, unknown> | Response> {
+  const definition = DATABASE_DEFINITIONS[table];
+  if (creating && definition.required.some((name) => input[name] === undefined || input[name] === null || input[name] === "")) {
+    return error("database_required_field_missing", 400);
+  }
+  const values: Record<string, unknown> = {};
+  for (const column of definition.columns) if (input[column] !== undefined) values[column] = input[column];
+  if (table === "users") {
+    const password = input.password;
+    if (creating && (typeof password !== "string" || password.length < 4)) return error("invalid_user_password", 400);
+    if (typeof password === "string") values.password_hash = await passwordHash(password);
+    if (values.account_status === "approved" && values.approved_at === undefined) values.approved_at = Date.now();
+    values.updated_at = Date.now();
+  }
+  if (creating) Object.entries(definition.defaults()).forEach(([key, value]) => { if (values[key] === undefined) values[key] = value; });
+  return values;
+}
+
+function isResponseValue(value: Record<string, unknown> | Response): value is Response { return value instanceof Response; }
+
+export async function createDatabaseRecord(request: Request, env: Env, table: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const definition = databaseDefinition(table);
+  if (!definition) return error("database_table_not_found", 404);
+  const body = await requestBody(request);
+  const input = body?.values;
+  if (!input || typeof input !== "object" || Array.isArray(input)) return error("database_values_required", 400);
+  const inputValues = input as Record<string, unknown>;
+  const values = await databaseValues(table as DatabaseTable, inputValues, true);
+  if (isResponseValue(values)) return values;
+  const id = typeof inputValues.id === "string" && inputValues.id ? inputValues.id : crypto.randomUUID();
+  const columns = ["id", ...Object.keys(values)];
+  try {
+    await env.DB.prepare(`INSERT INTO ${definition.source} (${columns.join(", ")}) VALUES (${columns.map(() => "?").join(", ")})`)
+      .bind(id, ...Object.values(values)).run();
+  } catch (cause) {
+    if (cause instanceof Error && /constraint failed/i.test(cause.message)) return error("database_constraint_violation", 409);
+    throw cause;
+  }
+  await audit(env, admin.id, "database_record_created", id, { table });
+  return json({ id, table, values }, { status: 201 });
+}
+
+export async function updateDatabaseRecord(request: Request, env: Env, table: string, id: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const definition = databaseDefinition(table);
+  if (!definition) return error("database_table_not_found", 404);
+  const body = await requestBody(request);
+  const input = body?.values;
+  if (!input || typeof input !== "object" || Array.isArray(input)) return error("database_values_required", 400);
+  const values = await databaseValues(table as DatabaseTable, input as Record<string, unknown>, false);
+  if (isResponseValue(values)) return values;
+  if (Object.keys(values).length === 0) return error("database_values_required", 400);
+  try {
+    const result = await env.DB.prepare(`UPDATE ${definition.source} SET ${Object.keys(values).map((column) => `${column} = ?`).join(", ")} WHERE id = ?`)
+      .bind(...Object.values(values), id).run();
+    if ((result.meta.changes ?? 0) === 0) return error("database_record_not_found", 404);
+  } catch (cause) {
+    if (cause instanceof Error && /constraint failed/i.test(cause.message)) return error("database_constraint_violation", 409);
+    throw cause;
+  }
+  await audit(env, admin.id, "database_record_updated", id, { table });
+  return json({ id, table, values });
+}
+
+export async function deleteDatabaseRecord(request: Request, env: Env, table: string, id: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const definition = databaseDefinition(table);
+  if (!definition) return error("database_table_not_found", 404);
+  if (table === "users" && id === admin.id) return error("cannot_delete_own_admin", 409);
+  try {
+    const result = await env.DB.prepare(`DELETE FROM ${definition.source} WHERE id = ?`).bind(id).run();
+    if ((result.meta.changes ?? 0) === 0) return error("database_record_not_found", 404);
+  } catch (cause) {
+    if (cause instanceof Error && /constraint failed/i.test(cause.message)) return error("database_constraint_violation", 409);
+    throw cause;
+  }
+  await audit(env, admin.id, "database_record_deleted", id, { table });
+  return json({ id, table, deleted: true });
 }

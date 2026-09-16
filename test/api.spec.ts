@@ -209,6 +209,21 @@ describe("administrator operations API", () => {
     expect(overview.status).toBe(200);
     expect(await overview.json()).toMatchObject({ tables: expect.arrayContaining([expect.objectContaining({ name: "users" })]) });
 
+    const createdLog = await api("/api/admin/database/audit_logs", jsonRequest({
+      values: { event_type: "manual_test", target_type: "test", target_id: reportId },
+    }, admin.cookie));
+    expect(createdLog.status).toBe(201);
+    const { id: logId } = await createdLog.json<{ id: string }>();
+    const updatedLog = await api(`/api/admin/database/audit_logs/${logId}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json", Cookie: admin.cookie },
+      body: JSON.stringify({ values: { event_type: "manual_test_updated" } }),
+    });
+    expect(updatedLog.status).toBe(200);
+    const deletedLog = await api(`/api/admin/database/audit_logs/${logId}`, {
+      method: "DELETE", headers: { Cookie: admin.cookie },
+    });
+    expect(deletedLog.status).toBe(200);
+
     const resolved = await api(`/api/admin/reports/${reportId}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Cookie: admin.cookie },

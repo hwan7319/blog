@@ -57,7 +57,7 @@ async function sha256(value: string): Promise<string> {
   return base64Url(new Uint8Array(digest));
 }
 
-async function passwordHash(password: string, salt = crypto.getRandomValues(new Uint8Array(16))): Promise<string> {
+export async function passwordHash(password: string, salt = crypto.getRandomValues(new Uint8Array(16))): Promise<string> {
   const material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
   const saltBytes = new Uint8Array(salt);
   const bits = await crypto.subtle.deriveBits(
