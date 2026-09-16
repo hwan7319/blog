@@ -200,7 +200,7 @@ export async function joinRoom(request: Request, env: Env, roomId: string): Prom
        AND r.join_ends_at > ?
        AND (SELECT COUNT(*) FROM room_participants p WHERE p.room_id = r.id) < r.capacity`,
   ).bind(
-    crypto.randomUUID(), roomId, room.room_type === "keyword" ? value : null, room.room_type === "link" ? value : null, now,
+    crypto.randomUUID(), user.id, room.room_type === "keyword" ? value : null, room.room_type === "link" ? value : null, now,
     roomId, now, now,
   ).run();
   if ((result.meta.changes ?? 0) !== 1) {

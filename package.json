@@ -8,11 +8,14 @@
     "deploy": "wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply blog-poom --local",
     "db:migrate:remote": "wrangler d1 migrations apply blog-poom --remote",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260916.1",
+    "@cloudflare/vitest-plugin": "^1.1.10",
     "typescript": "^5.9.2",
+    "vitest": "^4.1.11",
     "wrangler": "^4.132.0"
   }
 }
