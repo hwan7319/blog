@@ -1,0 +1,35 @@
+export interface Env {
+  DB: D1Database;
+}
+
+const json = (body: unknown, init: ResponseInit = {}) =>
+  Response.json(body, {
+    ...init,
+    headers: {
+      "Cache-Control": "no-store",
+      ...(init.headers ?? {}),
+    },
+  });
+
+async function health(env: Env): Promise<Response> {
+  const row = await env.DB.prepare("SELECT 1 AS ok").first<{ ok: number }>();
+  return json({ ok: row?.ok === 1, service: "blog-poom" });
+}
+
+export default {
+  async fetch(request, env): Promise<Response> {
+    const url = new URL(request.url);
+
+    if (request.method === "GET" && url.pathname === "/api/health") {
+      return health(env);
+    }
+
+    return json({ error: "not_found" }, { status: 404 });
+  },
+
+  async scheduled(controller, env, ctx): Promise<void> {
+    // 방 마감과 패널티 처리 구현 전에는 작업을 수행하지 않는다.
+    // controller.cron으로 1분 마감 작업과 KST 자정 패널티 만료 작업을 구분할 예정이다.
+    ctx.waitUntil(env.DB.prepare("SELECT 1").run());
+  },
+} satisfies ExportedHandler<Env>;
