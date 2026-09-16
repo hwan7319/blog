@@ -1,15 +1,8 @@
+import { adminMe, json, login, logout, me, signup } from "./auth";
+
 export interface Env {
   DB: D1Database;
 }
-
-const json = (body: unknown, init: ResponseInit = {}) =>
-  Response.json(body, {
-    ...init,
-    headers: {
-      "Cache-Control": "no-store",
-      ...(init.headers ?? {}),
-    },
-  });
 
 async function health(env: Env): Promise<Response> {
   const row = await env.DB.prepare("SELECT 1 AS ok").first<{ ok: number }>();
@@ -23,6 +16,12 @@ export default {
     if (request.method === "GET" && url.pathname === "/api/health") {
       return health(env);
     }
+
+    if (request.method === "POST" && url.pathname === "/api/auth/signup") return signup(request, env);
+    if (request.method === "POST" && url.pathname === "/api/auth/login") return login(request, env);
+    if (request.method === "POST" && url.pathname === "/api/auth/logout") return logout(request, env);
+    if (request.method === "GET" && url.pathname === "/api/auth/me") return me(request, env);
+    if (request.method === "GET" && url.pathname === "/api/admin/me") return adminMe(request, env);
 
     return json({ error: "not_found" }, { status: 404 });
   },
