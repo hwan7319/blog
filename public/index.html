@@ -1,83 +1,1145 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>품앗이</title>
-  <style>
-    :root{--ink:#19221d;--muted:#68756e;--line:#dfe7e1;--surface:rgba(255,255,255,.88);--page:#f5f7f3;--main:#17765a;--main-dark:#10533f;--lime:#d7f37d;--danger:#bd3c49;--shadow:0 18px 50px rgba(31,60,45,.10)}
-    *{box-sizing:border-box}html{background:var(--page)}body{margin:0;min-height:100vh;background:radial-gradient(circle at 85% -10%,#d9f4dc 0,transparent 31rem),radial-gradient(circle at 0 38%,#fff0c6 0,transparent 24rem),var(--page);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Malgun Gothic",sans-serif;letter-spacing:-.015em}
-    header{display:flex;justify-content:space-between;align-items:center;padding:19px max(24px,calc((100% - 1040px)/2));border-bottom:1px solid rgba(215,226,218,.85);background:rgba(250,252,248,.75);backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}h1{margin:0;font-size:21px;letter-spacing:-.05em;display:flex;align-items:center;gap:9px}h1 small{display:block;color:var(--muted);font-size:12px;font-weight:500;letter-spacing:0;margin:0}
-    main{max-width:980px;margin:0 auto;padding:32px 20px 100px}.welcome{padding:8px 4px 24px;text-align:center}.welcome b{display:block;font-size:clamp(20px,3vw,27px);line-height:1.35;letter-spacing:-.045em;color:var(--main-dark)}.welcome p{margin:8px 0 0;color:var(--muted);font-size:15px}.hidden{display:none!important}
-    nav{display:flex;gap:6px;margin:0 0 18px;padding:5px;background:rgba(231,238,231,.82);border:1px solid #dbe5dc;border-radius:15px;width:max-content;box-shadow:0 6px 16px rgba(23,67,46,.04)}button{cursor:pointer;font:inherit;transition:transform .16s ease,box-shadow .16s ease,background .16s ease;border:0}button:active{transform:translateY(1px)}.tab,.secondary{background:transparent;border:1px solid transparent;border-radius:10px;color:#526059;padding:9px 14px;font-weight:650}.tab.active{background:#fff;color:var(--main-dark);box-shadow:0 2px 8px rgba(25,54,39,.09)}.secondary:hover{background:#eef4ef;color:var(--main-dark)}
-    .card{background:var(--surface);border:1px solid rgba(219,229,221,.95);border-radius:22px;padding:24px;margin-bottom:15px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}.card h2{font-size:18px;letter-spacing:-.035em;margin:0 0 17px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}label{display:block;color:#57655d;font-size:12px;font-weight:720;letter-spacing:-.01em}input,select{width:100%;margin-top:6px;padding:12px 13px;border:1px solid #d9e3dc;border-radius:11px;font:inherit;background:#fff;color:var(--ink);outline:none;transition:border .15s,box-shadow .15s}input:focus,select:focus{border-color:#67a98d;box-shadow:0 0 0 4px rgba(79,159,125,.13)}select[multiple]{min-height:112px}.primary{border:0;background:linear-gradient(135deg,var(--main),var(--main-dark));color:#fff;padding:11px 16px;border-radius:11px;font-weight:750;box-shadow:0 8px 16px rgba(20,101,74,.20)}.primary:hover{transform:translateY(-1px);box-shadow:0 12px 20px rgba(20,101,74,.25)}.primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}.danger{color:var(--danger)}
-    .message{margin-bottom:14px;border-radius:13px;padding:12px 14px;background:#e5f5ed;color:#126344;border:1px solid #c8e8d8}.message.error{background:#fff0f0;color:#a43b45;border-color:#f4d5d7}.room{position:relative;border:1px solid #e1eae3;border-radius:16px;padding:17px;margin-top:11px;background:linear-gradient(135deg,#fff,#fcfdfb)}.room:first-child{margin-top:0}.room strong{display:block;font-size:16px;letter-spacing:-.025em}.meta{color:var(--muted);font-size:13px;margin:7px 0 13px;line-height:1.6}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.spacer{flex:1}.badge{background:#e4f4eb;color:#166746;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:780;letter-spacing:0}.badge.waiting{background:#fff1c9;color:#8b5c04}.badge.closed,.badge.deleted{background:#edf0ee;color:#68746d}.badge.in_progress{background:#dff4ed;color:#116f4b}.empty{color:var(--muted);text-align:center;padding:34px 20px}.notice{color:var(--muted);font-size:13px;line-height:1.65}.detail{margin-top:12px;padding:12px 14px;background:#f2f7f3;border:1px solid #e0ebe3;border-radius:13px}.participant{padding:13px 0;border-top:1px solid #dfe9e2}.participant:first-child{border-top:0}.small{padding:7px 10px;font-size:12px}.detail .primary{padding:7px 10px}a.secondary{text-decoration:none;display:inline-block}.card p:last-child{margin-bottom:0}.create-tabs{margin:0 0 12px}.mission-group{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:20px 0 14px;padding:13px;background:#f3f7f4;border-radius:11px;color:#526158;font-size:13px;font-weight:650}.mission-group span{color:#30463a;font-weight:760}.mission-group label{margin:0;font-size:13px;color:#526158}.mission-group input{width:auto;margin:0 4px 0 0;vertical-align:middle}#account{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;font-size:13px;font-weight:700}.account-pill{padding:5px 8px;border-radius:999px;background:#e4f4ec;color:#176044;font-size:11px}.account-pill.alert{background:#fff0df;color:#97610a}.account-pill.locked{background:#fff0f1;color:#af3d49}.account-alert{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:13px 15px;background:#fff4df;border:1px solid #f2ddb4;color:#80590e;border-radius:14px;font-size:13px;font-weight:650}.account-alert strong{color:#6e4a03}.auth-switch{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0;padding:5px;background:#edf3ee;border:1px solid #dce7df;border-radius:13px;box-shadow:none}.auth-switch .tab{padding:11px 12px;color:#53625a;font-weight:760}.auth-switch .tab.active{background:linear-gradient(135deg,var(--main),var(--main-dark));color:#fff;box-shadow:0 5px 12px rgba(20,101,74,.22)}#auth{width:min(100%,405px);margin:0 auto;padding:28px;background:rgba(255,255,255,.94)}#auth form h2{margin:25px 0 18px;font-size:20px;text-align:center}#auth form>label{font-size:12px;color:#78867e;margin-top:12px;font-weight:720}#auth form>label>input{margin-top:0;padding:12px 13px;background:#fafbfa;border-radius:9px;font-size:14px}#auth form>label>input::placeholder{color:#97a39b}#auth .grid{grid-template-columns:1fr;gap:0}#auth form>label{margin-top:14px}#auth form>p{margin:24px 0 0}#auth form .primary{width:100%;padding:13px 16px;font-size:15px}
-    @media(max-width:620px){header{padding:15px 17px}h1{font-size:18px;gap:6px}h1 small{display:none}main{padding:22px 14px 82px}.welcome{padding:3px 3px 20px}.welcome b{font-size:28px}.card{padding:19px;border-radius:18px}.grid{grid-template-columns:1fr;gap:10px}nav{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.tab{padding:9px 6px;text-align:center}.row .primary{flex:1}.room{padding:15px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>품앗이</title>
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f7f8; --surface:#ffffff; --text:#16191a; --muted:#6b7280; --border:#e5e7eb;
+    --grad1:#10b981; --grad2:#06b6d4; --primary:#0d9488;
+    --success:#10b981; --warn:#f59e0b; --danger:#ef4444;
+    --type-keyword:#0e9c6c; --type-keyword-bg:#eef8f3;
+    --type-link:#2563eb; --type-link-bg:#eef3fd;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);}
+  .topbar{
+    position:sticky;top:0;z-index:20;padding:16px 20px 14px;
+    background:var(--surface);color:var(--text);border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .topbar .logo{font-size:18px;font-weight:800;letter-spacing:-0.5px;}
+  .topbar .logo span{opacity:.6;font-weight:600;font-size:11.5px;display:block;margin-top:2px;}
+  .iconbtn{background:#f1f2f4;border:1px solid var(--border);color:var(--text);min-width:34px;height:32px;padding:0 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;}
+  main{max-width:720px;margin:0 auto;padding:12px;padding-bottom:96px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(15,25,25,0.04);}
+  .card h2{font-size:15px;margin:0 0 14px;font-weight:700;}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;}
+  input,select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:14px;font-size:14px;margin-bottom:12px;background:#fbfbfc;font-family:inherit;}
+  input:focus,select:focus{outline:none;border-color:var(--primary);background:#fff;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  button.btn{
+    background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;border:none;
+    padding:14px;border-radius:16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;
+    box-shadow:0 6px 16px rgba(16,185,129,0.22);
+  }
+  button.btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;background:#e5e7eb;color:#9ca3af;}
+  button.btn.ghost{background:#f1f2f4;color:var(--text);box-shadow:none;border:1px solid var(--border);}
+  button.btn.outline{background:#fff;color:var(--danger);border:1.5px solid #fde2e1;box-shadow:none;}
+  button.btn.small{width:auto;padding:9px 14px;font-size:12.5px;border-radius:12px;}
+  .segment{display:flex;background:#f1f2f4;border-radius:16px;padding:4px;margin-bottom:16px;}
+  .segment button{flex:1;border:none;background:transparent;padding:10px;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;}
+  .segment button.active{background:#fff;color:var(--text);box-shadow:0 2px 6px rgba(15,25,25,0.1);}
+  #roomTabKw.active, #createTabKw.active{color:var(--type-keyword);}
+  #roomTabLk.active, #createTabLk.active{color:var(--type-link);}
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;}
+  .chip.wait{background:#fff4e0;color:#b3720b;}
+  .chip.ok{background:#e6f9f1;color:#0e9c6c;}
+  .chip.gray{background:#f0eef4;color:#8b8798;}
+  .chip.bad{background:#fdeceb;color:#e0453d;}
+  .missionchip{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border:1.5px solid var(--border);border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;user-select:none;}
+  .missionchip input{width:auto;margin:0;}
+  .missionchip.checked{border-color:var(--text);background:#f1f2f4;color:var(--text);}
+  .roomcard{border:1px solid var(--border);border-radius:14px;padding:11px;margin-bottom:8px;}
+  .roomcard .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}
+  .roomcard .name{font-size:15px;font-weight:800;color:var(--text);}
+  .meta{font-size:12px;color:var(--muted);text-align:left;word-break:break-all;overflow-wrap:anywhere;line-height:1.5;}
+  .meta.roomtime{word-break:keep-all;overflow-wrap:normal;}
+  .typechip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;font-size:10.5px;font-weight:800;margin-right:6px;}
+  .typechip.type-keyword{background:var(--type-keyword-bg);color:var(--type-keyword);}
+  .typechip.type-link{background:var(--type-link-bg);color:var(--type-link);}
+  .participantlist.type-keyword{background:var(--type-keyword-bg);}
+  .participantlist.type-link{background:var(--type-link-bg);}
+  .detail-refresh{display:flex;justify-content:flex-end;margin-top:6px;}
+  .participantlist{margin-top:8px;padding:6px;background:#f6f7f8;border-radius:12px;}
+  .participantitem{background:#fff;border-radius:10px;padding:9px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;text-align:left;}
+  .participantitem:last-child{margin-bottom:0;}
+  .participantitem .pinfo{flex:1 1 160px;min-width:0;text-align:left;}
+  .participantitem .pname{font-size:13px;font-weight:700;margin-bottom:2px;text-align:left;}
+  .participantitem .pactions{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+  .participantitem .pactions .btnrow{display:flex;gap:5px;}
+  .statuschip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:10.5px;font-weight:700;border:1px dashed transparent;}
+  .statuschip.wait{background:transparent;border-color:#d8d4e0;color:var(--muted);}
+  .statuschip.ok{background:transparent;border-color:#a7e8cf;color:#0e9c6c;}
+  button.btn.visit{background:#0d9488;color:#fff;box-shadow:0 4px 10px rgba(13,148,136,0.28);font-weight:800;}
+  button.btn.visited{background:#eef2f1 !important;color:#8b8798 !important;box-shadow:none !important;border:1px solid var(--border);font-weight:700;}
+  button.btn.visit.type-keyword{background:var(--type-keyword);color:#fff;box-shadow:0 4px 10px rgba(14,156,108,0.3);}
+  button.btn.visit.type-link{background:var(--type-link);color:#fff;box-shadow:0 4px 10px rgba(37,99,235,0.3);}
+  button.btn.visited.type-keyword,button.btn.visited.type-link{background:#eef2f1 !important;color:#8b8798 !important;box-shadow:none !important;border:1px solid var(--border);}
+  .participantitem .pactions .btn.small.ghost{background:#fff;border:1.5px solid var(--border);color:var(--text);box-shadow:none;font-weight:600;}
+  .roomcard .actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;}
+  .penaltysummary{margin-top:10px;padding:12px;background:#fdf3f2;border:1px solid #f6d9d6;border-radius:14px;}
+  .penaltysummary-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;font-weight:800;color:#c0392b;flex-wrap:wrap;}
+  .penaltyrow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-top:1px solid #f6d9d6;font-size:12.5px;}
+  .penaltyrow:first-of-type{border-top:none;}
+  .penaltyrow .pname{font-weight:700;flex-shrink:0;}
+  .penaltyrow .meta{flex:1;padding-left:0;}
+  .type-keyword-pane h2{color:var(--type-keyword);}
+  .type-link-pane h2{color:var(--type-link);}
+  .type-keyword-pane button.btn:not(.ghost):not(.outline){background:var(--type-keyword);box-shadow:0 6px 16px rgba(14,156,108,0.22);}
+  .type-link-pane button.btn:not(.ghost):not(.outline){background:var(--type-link);box-shadow:0 6px 16px rgba(37,99,235,0.22);}
+  .type-keyword-pane .missionchip.checked{border-color:var(--type-keyword);background:var(--type-keyword-bg);color:var(--type-keyword);}
+  .type-link-pane .missionchip.checked{border-color:var(--type-link);background:var(--type-link-bg);color:var(--type-link);}
+  .type-keyword-pane .preview{color:var(--type-keyword);}
+  .type-link-pane .preview{color:var(--type-link);}
+  .preview{font-size:12.5px;color:var(--primary);font-weight:700;margin:-4px 0 12px;padding-left:2px;}
+  .hint{font-size:11.5px;color:var(--muted);margin:-6px 0 12px;}
+  .msg{font-size:13px;padding:12px 14px;border-radius:14px;margin-bottom:10px;font-weight:600;}
+  .msg.ok{background:#e6f9f1;color:#0e9c6c;}
+  .msg.err{background:#fdeceb;color:#e0453d;}
+  .hidden{display:none !important;}
+  .muted{color:var(--muted);font-size:12px;}
+  .loading{text-align:center;padding:26px;color:var(--muted);font-size:13px;}
+  .empty{text-align:center;padding:30px 10px;color:var(--muted);font-size:13px;}
+  .badgebar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .statuspill{flex:1;min-width:100px;border-radius:16px;padding:11px 12px;font-size:12px;font-weight:700;display:flex;justify-content:center;align-items:center;text-align:center;}
+  .statuspill.safe{background:#e6f9f1;color:#0e9c6c;}
+  .statuspill.alert{background:#fdeceb;color:#e0453d;}
+  .statuspill.user{background:#f1f2f4;color:var(--text);}
+  .lockbanner{background:#fdeceb;color:#c0392b;border-radius:16px;padding:16px;margin-bottom:14px;font-size:13.5px;font-weight:700;text-align:center;}
+
+  .bottomnav{
+    position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);
+    display:flex;padding:8px 10px calc(8px + env(safe-area-inset-bottom));z-index:20;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.04);
+  }
+  .bottomnav button{
+    flex:1;background:none;border:none;padding:8px 4px;font-size:11px;font-weight:700;color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+  }
+  .bottomnav button .ic{font-size:19px;}
+  .bottomnav button.active{color:var(--primary);}
+  .bottomnav button:nth-child(1).active{color:var(--type-keyword);}
+  .bottomnav button:nth-child(2).active{color:var(--type-link);}
+  .bottomnav button:nth-child(3).active{color:#7c3aed;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;}
+  th{color:var(--muted);font-weight:700;font-size:11px;}
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(15,28,26,0.45);z-index:50;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-box{
+    background:var(--surface);border-radius:20px;padding:26px 22px;max-width:340px;width:100%;
+    box-shadow:0 12px 32px rgba(0,0,0,0.18);text-align:center;
+  }
+  .modal-msg{font-size:14.5px;font-weight:700;line-height:1.5;margin-bottom:18px;white-space:pre-line;}
+
+  .progress-wrap{width:100%;height:6px;background:#e5e7eb;border-radius:100px;margin-top:10px;overflow:hidden;}
+  .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:2px;}
+  button.btn.ghost .spinner,button.btn.outline .spinner{border-color:rgba(0,0,0,.15);border-top-color:var(--text);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .progress-bar{height:100%;width:30%;background:linear-gradient(90deg,var(--grad1),var(--grad2));border-radius:100px;animation:progressMove 1s infinite ease-in-out;}
+  @keyframes progressMove{
+    0%{margin-left:0%;width:20%;}
+    50%{margin-left:60%;width:40%;}
+    100%{margin-left:0%;width:20%;}
+  }
+  .modal-box-form{text-align:left;}
+  .modal-title{font-size:16px;font-weight:800;margin-bottom:14px;}
+  .modal-btnrow{display:flex;gap:8px;margin-top:4px;}
+  .modal-btnrow .btn{width:auto;flex:1;}
+
+  /* ===== 데스크탑(태블릿 이상) 반응형: PC에서도 답답하지 않게 ===== */
+  @media (min-width:760px){
+    main{max-width:900px;}
+    .card{padding:20px;}
+    #roomList{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+    #roomList .roomcard{margin-bottom:0;}
+    .grid3{grid-template-columns:repeat(3,1fr);}
+    button.btn:hover:not(:disabled){filter:brightness(1.06);}
+    button.btn.ghost:hover:not(:disabled){background:#e9eaec;}
+    .bottomnav{max-width:900px;left:50%;right:auto;transform:translateX(-50%);border-radius:20px 20px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,0.06);}
+    .topbar{padding:18px 28px 16px;}
+    .modal-box{max-width:400px;}
+  }
+</style>
 </head>
 <body>
-  <header><h1><span style="display:inline-grid;place-items:center;width:31px;height:31px;border-radius:10px;background:var(--main);color:var(--lime);font-size:17px">✦</span>품앗이</h1><div id="account"></div></header>
+  <div class="topbar">
+    <div class="logo">품앗이 🌸<span>블로그 자동 운영 플랫폼</span></div>
+    <div id="userInfoBar"></div>
+  </div>
+
   <main>
-    <section class="welcome"><b>블로그 자동 운영 플랫폼</b></section>
-    <div id="message"></div>
-    <section id="shared-room" class="card hidden"></section>
-    <section id="auth" class="card">
-      <div class="row auth-switch"><button class="tab active" data-auth="login">로그인</button><button class="tab" data-auth="signup">회원가입</button></div>
-      <form id="login-form"><h2>로그인</h2><label>아이디<input name="nickname" placeholder="닉네임을 입력하세요" required></label><label>비밀번호<input name="password" type="password" placeholder="비밀번호를 입력하세요" required></label><p><button class="primary">로그인</button></p></form>
-      <form id="signup-form" class="hidden"><h2>가입 신청</h2><div class="grid"><label>아이디<input name="nickname" placeholder="닉네임을 입력하세요" required></label><label>비밀번호<input name="password" type="password" placeholder="8자 이상 입력하세요" required minlength="8"></label></div><label>블로그 주소<input name="blogUrl" type="url" placeholder="https://blog.naver.com/..." required></label><label>블로그명<input name="blogName" placeholder="블로그명을 입력하세요" required></label><p class="notice">가입 후 운영자 승인까지 로그인이 제한됩니다.</p><button class="primary">가입 신청하기</button></form>
-    </section>
-    <section id="app" class="hidden">
-      <div id="account-status" class="hidden"></div>
-      <nav><button class="tab active" data-page="rooms">⌂ 방 목록</button><button class="tab" data-page="create">＋ 방 만들기</button><button class="tab" data-page="me">◌ 마이</button></nav>
-      <section id="page-rooms"><div class="card"><div class="row"><h2 class="spacer">오늘의 방</h2><select id="room-type" style="width:auto;margin:0"><option value="keyword">키워드방</option><option value="link">링크방</option></select></div><div id="rooms"></div></div></section>
-      <section id="page-create" class="hidden"><div class="row create-tabs"><button class="tab active" id="createTabKw" onclick="switchCreateType('keyword')">⌨️ 키워드방</button><button class="tab" id="createTabLk" onclick="switchCreateType('link')">🔗 링크방</button></div><form id="createPane-keyword" class="card"><h2>키워드방 만들기</h2><div class="grid"><label>방 이름<input id="kwName" placeholder="예: 10시 댓글방"></label><label>시작 시각<input id="kwStart" type="datetime-local" required></label><label>모집 인원<input id="kwCap" type="number" min="1" value="5" required></label></div><div class="mission-group"><span>품앗이 미션</span><label><input type="checkbox" class="kwMission" value="공감"> 공감</label><label><input type="checkbox" class="kwMission" value="댓글"> 댓글</label><label><input type="checkbox" class="kwMission" value="스크랩"> 스크랩</label></div><p class="notice">키워드방은 참여 15분, 진행 15분으로 자동 설정됩니다.</p><button type="button" class="primary" onclick="createKw()">키워드방 만들기</button></form><form id="createPane-link" class="card hidden"><h2>링크방 만들기</h2><div class="grid"><label>방 이름<input id="lkName" placeholder="예: 10시 댓글방"></label><label>시작 시각<input id="lkStart" type="datetime-local" required></label><label>모집 인원<input id="lkCap" type="number" min="1" value="5" required></label><label>대기 시간(분)<input id="lkWait" type="number" min="1" value="10" required></label><label>진행 시간(분)<input id="lkProgress" type="number" min="1" value="20" required></label></div><div class="mission-group"><span>품앗이 미션</span><label><input type="checkbox" class="lkMission" value="공감"> 공감</label><label><input type="checkbox" class="lkMission" value="댓글"> 댓글</label><label><input type="checkbox" class="lkMission" value="스크랩"> 스크랩</label></div><button type="button" class="primary" onclick="createLk()">링크방 만들기</button></form></section>
-      <section id="page-me" class="hidden"><div class="card"><h2>최근 7일 활동</h2><div id="activity" class="notice"></div></div><div class="card"><h2>참여한 방</h2><div id="participations"></div><p><button class="secondary small" id="copy-participations">내 참여방 목록 복사</button></p></div><div class="card"><h2>패널티</h2><div id="penalties"></div></div></section>
-    </section>
+    <div id="msgBox"></div>
+
+    <div id="apiConfigBar" class="card hidden">
+      <h2>서버 연결하기</h2>
+      <label>Apps Script 배포 URL</label>
+      <input id="apiUrlInput" placeholder="https://script.google.com/macros/s/xxxx/exec">
+      <button class="btn" onclick="saveApiUrl()">연결하고 시작하기</button>
+    </div>
+
+    <div id="bootLoading" class="loading hidden">로그인 확인 중...</div>
+
+    <div id="sharedRoomPreview" class="card hidden" style="border:2px solid var(--primary);">
+      <div class="hint" style="margin-top:0;">🔗 초대받은 품앗이방</div>
+      <div id="sharedRoomBody"></div>
+    </div>
+
+    <div id="authSection" class="card hidden">
+      <div class="segment">
+        <button id="tabLoginBtn" class="active" onclick="switchAuth('login')">로그인</button>
+        <button id="tabSignupBtn" onclick="switchAuth('signup')">회원가입</button>
+      </div>
+      <div id="loginForm">
+        <label>닉네임</label>
+        <input id="loginNick" placeholder="닉네임을 입력하세요" onkeydown="if(event.key==='Enter') doLogin()">
+        <label>비밀번호</label>
+        <input id="loginPw" type="text" placeholder="비밀번호를 입력하세요" onkeydown="if(event.key==='Enter') doLogin()">
+        <button class="btn" id="loginBtn" onclick="doLogin()">로그인</button>
+      </div>
+      <div id="signupForm" class="hidden">
+        <label>닉네임</label>
+        <input id="suNick" placeholder="닉네임">
+        <label>비밀번호(블로그 아이디)</label>
+        <input id="suPw" type="text" placeholder="비밀번호">
+        <label>블로그 주소</label>
+        <input id="suBlog" placeholder="https://blog.naver.com/...">
+        <label>블로그명 (네이버에 노출되는 실제 블로그 이름)</label>
+        <input id="suBlogName" placeholder="예: 여행하는 감자" onkeydown="if(event.key==='Enter') doSignup()">
+        <p class="hint" style="margin-top:-8px;">키워드 검색 시 다른 참여자가 이 이름으로 내 글을 찾아요.</p>
+        <button class="btn" id="signupBtn" onclick="doSignup()">가입 신청하기</button>
+        <p class="muted">가입 신청 후 운영자 승인이 필요해요.</p>
+      </div>
+    </div>
+
+    <div id="appSection" class="hidden">
+      <div class="badgebar" id="badgeBar"></div>
+      <div id="lockBanner" class="lockbanner hidden">🔒 계정이 잠겨있어요. 아래 "마이" 탭에서 패널티 내역을 확인하고 해결해주세요. 방목록/방만들기는 잠금 해제 후 이용 가능합니다.</div>
+
+      <div id="tab-rooms">
+        <div class="segment">
+          <button id="roomTabKw" class="active" onclick="switchRoomType('키워드')">⌨️ 키워드방</button>
+          <button id="roomTabLk" onclick="switchRoomType('링크')">🔗 링크방</button>
+        </div>
+        <div class="card type-keyword-pane" id="roomListCard">
+          <h2 id="roomListTitle">🔥 오늘의 키워드방</h2>
+          <div id="roomList" class="loading">불러오는 중...</div>
+        </div>
+      </div>
+
+      <div id="tab-create" class="hidden">
+        <div class="segment">
+          <button id="createTabKw" class="active" onclick="switchCreateType('keyword')">⌨️ 키워드방</button>
+          <button id="createTabLk" onclick="switchCreateType('link')">🔗 링크방</button>
+        </div>
+
+        <div class="card type-keyword-pane" id="createPane-keyword">
+          <h2>⌨️ 키워드 품앗이 만들기</h2>
+          <div class="hint">키워드방은 시간이 고정이에요: 대기 15분 + 진행 15분 = 총 30분</div>
+          <label>방 이름 (비워두면 자동 생성)</label>
+          <input id="kwName" placeholder="예: 10시 댓글방">
+          <label>시작 시간 (한국시간 기준)</label>
+          <input type="datetime-local" id="kwStart" oninput="updatePreview('kw')">
+          <label>모집 인원</label>
+          <input type="number" id="kwCap" value="5" min="1" onwheel="this.blur()">
+          <label>원하는 품앗이 (복수선택 가능)</label>
+          <div class="grid3" style="margin-bottom:12px;">
+            <label class="missionchip" onclick="toggleMission(this)"><input type="checkbox" class="kwMission" value="공감" onchange="updatePreview('kw')"> 👍 공감</label>
+            <label class="missionchip" onclick="toggleMission(this)"><input type="checkbox" class="kwMission" value="댓글" onchange="updatePreview('kw')"> 💬 댓글</label>
+            <label class="missionchip" onclick="toggleMission(this)"><input type="checkbox" class="kwMission" value="스크랩" onchange="updatePreview('kw')"> ⭐ 스크랩</label>
+          </div>
+          <div class="preview" id="kwPreview">미리보기: 품앗이방</div>
+          <button class="btn" id="kwCreateBtn" onclick="createKw()">키워드방 만들기</button>
+          <div class="progress-wrap hidden" id="kwProgressWrap"><div class="progress-bar" id="kwProgressBar"></div></div>
+        </div>
+
+        <div class="card hidden type-link-pane" id="createPane-link">
+          <h2>🔗 링크 품앗이 만들기</h2>
+          <div class="hint">대기시간/진행시간을 자유롭게 정할 수 있어요. 급하면 짧게, 여유있게 하고 싶으면 길게!</div>
+          <label>방 이름 (비워두면 자동 생성)</label>
+          <input id="lkName" placeholder="예: 10시 댓글방">
+          <label>시작 시간 (한국시간 기준)</label>
+          <input type="datetime-local" id="lkStart" oninput="updatePreview('lk')">
+          <div class="grid3">
+            <div><label>모집 인원</label><input type="number" id="lkCap" value="5" min="1" onwheel="this.blur()"></div>
+            <div><label>대기시간(분)</label><input type="number" id="lkWait" value="10" min="1" onwheel="this.blur()"></div>
+            <div><label>진행시간(분)</label><input type="number" id="lkProgress" value="20" min="1" onwheel="this.blur()"></div>
+          </div>
+          <label>원하는 품앗이 (복수선택 가능)</label>
+          <div class="grid3" style="margin-bottom:12px;">
+            <label class="missionchip" onclick="toggleMission(this)"><input type="checkbox" class="lkMission" value="공감" onchange="updatePreview('lk')"> 👍 공감</label>
+            <label class="missionchip" onclick="toggleMission(this)"><input type="checkbox" class="lkMission" value="댓글" onchange="updatePreview('lk')"> 💬 댓글</label>
+            <label class="missionchip" onclick="toggleMission(this)"><input type="checkbox" class="lkMission" value="스크랩" onchange="updatePreview('lk')"> ⭐ 스크랩</label>
+          </div>
+          <div class="preview" id="lkPreview">미리보기: 품앗이방</div>
+          <button class="btn" id="lkCreateBtn" onclick="createLk()">링크방 만들기</button>
+          <div class="progress-wrap hidden" id="lkProgressWrap"><div class="progress-bar" id="lkProgressBar"></div></div>
+        </div>
+      </div>
+
+      <div id="tab-my" class="hidden">
+        <div class="card">
+          <h2>📋 내 참여 내역</h2>
+          <div id="myParticipationsList" class="loading">불러오는 중...</div>
+          <button class="btn ghost" style="margin-top:10px;" onclick="copyMyParticipations()">내 참여방 목록 복사</button>
+        </div>
+        <div class="card">
+          <h2>📅 주간 참여 캘린더</h2>
+          <div id="calendarBox" class="loading">불러오는 중...</div>
+        </div>
+        <div class="card">
+          <h2>⚠️ 패널티 현황</h2>
+          <div id="penaltyBox" class="loading">불러오는 중...</div>
+        </div>
+      </div>
+    </div>
   </main>
-  <script>
-    const $ = (selector) => document.querySelector(selector);
-    const api = async (path, options = {}) => {
-      const response = await fetch(path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json', ...(options.headers || {}) }, ...options });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || 'request_failed');
-      return data;
-    };
-    const errorText = { invalid_credentials:'닉네임 또는 비밀번호가 맞지 않습니다.', account_pending:'운영자 승인을 기다리고 있습니다.', account_rejected:'가입 신청이 반려되었습니다.', account_locked:'계정이 잠겨 있습니다.', account_not_approved:'승인된 회원만 이용할 수 있습니다.', unresolved_penalty:'미해결 패널티가 있어 이용할 수 없습니다.', room_full:'방 정원이 찼습니다.', room_not_started:'아직 참여 시간이 아닙니다.', room_join_closed:'참여 시간이 종료되었습니다.' };
-    function message(text, isError = false) { $('#message').innerHTML = text ? `<div class="message ${isError ? 'error' : ''}">${text}</div>` : ''; }
-    function formatTime(timestamp) { return new Date(timestamp).toLocaleString('ko-KR',{ month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit' }); }
-    function statusLabel(status) { return ({ waiting:'모집 중', in_progress:'진행 중', closed:'종료', deleted:'삭제' })[status] || status; }
-    function penaltyReasonLabel(reason) { return ({ auto_incomplete:'미완료(자동)', participant_report:'참여자 신고', admin:'운영자 처리' })[reason] || reason; }
-    let currentUser = null;
-    const participantValues = new Map();
-    async function bootstrap() { try { const { user } = await api('/api/auth/me'); currentUser = user; showApp(); } catch { $('#auth').classList.remove('hidden'); } }
-    async function refreshAccountStatus() { const { penalties } = await api('/api/me/penalties'); const unresolved = penalties.filter(item => item.status === 'unresolved').length; const locked = currentUser.accountStatus === 'locked'; const adminLink = currentUser.roles && currentUser.roles.includes('admin') ? '<a class="secondary" href="/admin.html">관리자</a>' : ''; $('#account').innerHTML = `<span>${escapeHtml(currentUser.nickname)}님</span><span class="account-pill ${unresolved ? 'alert' : ''}">패널티 ${unresolved ? '있음 ⚠️' : '없음 ✅'}</span><span class="account-pill ${locked ? 'locked' : ''}">${locked ? '계정 잠금' : '계정 정상'}</span>${adminLink}<button class="secondary" id="logout">로그아웃</button>`; $('#logout').onclick = async () => { await api('/api/auth/logout',{method:'POST'}); location.reload(); }; const alert = $('#account-status'); if (locked || unresolved) { alert.classList.remove('hidden'); alert.innerHTML = `<span><strong>${locked ? '계정이 잠겨 있습니다.' : '미해결 패널티가 있습니다.'}</strong> 마이 페이지에서 원인 방을 확인하고 완료 처리해 주세요.</span><button class="secondary small" id="go-my">마이 페이지</button>`; $('#go-my').onclick = () => document.querySelector('[data-page="me"]').click(); } else { alert.classList.add('hidden'); alert.innerHTML = ''; } }
-    function showApp() { $('#auth').classList.add('hidden'); $('#app').classList.remove('hidden'); refreshAccountStatus().catch(() => {}); loadRooms(); }
-    document.querySelectorAll('[data-auth]').forEach(button => button.onclick = () => { document.querySelectorAll('[data-auth]').forEach(item => item.classList.toggle('active',item === button)); $('#login-form').classList.toggle('hidden',button.dataset.auth !== 'login'); $('#signup-form').classList.toggle('hidden',button.dataset.auth !== 'signup'); });
-    $('#login-form').onsubmit = async (event) => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.target)); try { const result = await api('/api/auth/login',{method:'POST',body:JSON.stringify(data)}); currentUser = result.user; showApp(); message('로그인했습니다.'); } catch (error) { message(errorText[error.message] || '로그인에 실패했습니다.',true); } };
-    $('#signup-form').onsubmit = async (event) => { event.preventDefault(); try { await api('/api/auth/signup',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(event.target)))}); message('가입 신청이 접수되었습니다. 운영자 승인 후 로그인할 수 있습니다.'); event.target.reset(); } catch (error) { message(error.message === 'nickname_taken' ? '이미 사용 중인 닉네임입니다.' : '가입 신청에 실패했습니다.',true); } };
-    document.querySelectorAll('[data-page]').forEach(button => button.onclick = () => { document.querySelectorAll('[data-page]').forEach(item => item.classList.toggle('active',item === button)); ['rooms','create','me'].forEach(page => $('#page-'+page).classList.toggle('hidden',page !== button.dataset.page)); if (button.dataset.page === 'rooms') loadRooms(); if (button.dataset.page === 'me') loadMe(); });
-    async function loadRooms() { const type = $('#room-type').value; $('#rooms').innerHTML = '<p class="notice">불러오는 중...</p>'; try { const { rooms } = await api('/api/rooms?type='+type); $('#rooms').innerHTML = rooms.length ? rooms.map(room => `<article class="room"><div class="row"><strong>${escapeHtml(room.name)}</strong><span class="badge ${room.status}">${statusLabel(room.status)}</span></div><div class="meta">${room.type === 'keyword' ? '키워드' : '링크'} · ${room.participantCount}/${room.capacity}명 · ${room.missions.join(', ')}<br>참여 ${formatTime(room.joinStartsAt)} ~ ${formatTime(room.joinEndsAt)}</div><div class="row"><button class="primary join" data-id="${room.id}" data-type="${room.type}" ${room.isFull || room.status !== 'waiting' ? 'disabled' : ''}>참여하기</button><button class="secondary small detail-button" data-id="${room.id}">참여자 보기</button><button class="secondary small share-button" data-id="${room.id}">링크 복사</button>${room.creator.id===currentUser.id?`<button class="secondary small delete-button" data-id="${room.id}">방 삭제</button>`:''}</div><div class="detail hidden" id="detail-${room.id}"></div></article>`).join('') : '<p class="empty">현재 열려 있는 방이 없습니다.</p>'; document.querySelectorAll('.join').forEach(button => button.onclick = () => joinRoom(button.dataset.id,button.dataset.type)); document.querySelectorAll('.detail-button').forEach(button => button.onclick = () => toggleDetail(button.dataset.id)); document.querySelectorAll('.share-button').forEach(button => button.onclick = () => copyShareLink(button.dataset.id)); document.querySelectorAll('.delete-button').forEach(button => button.onclick = () => deleteRoom(button.dataset.id)); } catch { $('#rooms').innerHTML = '<p class="empty">방을 불러오지 못했습니다.</p>'; } }
-    $('#room-type').onchange = loadRooms;
-    async function joinRoom(roomId,type) { const value = prompt(type === 'keyword' ? '검색할 키워드를 입력하세요.' : '내 게시글 링크를 입력하세요.'); if (!value) return; try { await api(`/api/rooms/${roomId}/participants`,{method:'POST',body:JSON.stringify(type === 'keyword' ? { keyword:value } : { linkUrl:value })}); message('방에 참여했습니다.'); loadRooms(); } catch (error) { message(errorText[error.message] || '방 참여에 실패했습니다.',true); } }
-    async function toggleDetail(roomId) { const box=$('#detail-'+roomId); if (!box) { message('현재 목록에서 해당 방을 찾을 수 없습니다.', true); return; } if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; } box.classList.remove('hidden'); box.innerHTML='<p class="notice">참여자 정보를 불러오는 중...</p>'; try { const {participants,myVisitedTargetIds}=await api(`/api/rooms/${roomId}/participants`); box.innerHTML=participants.length?participants.map(participant=>{const mine=participant.user_id===currentUser.id;const value=participant.keyword||participant.link_url||'';const visited=myVisitedTargetIds.includes(participant.user_id);participantValues.set(`${roomId}:${participant.user_id}`,{value,type:participant.keyword?'keyword':'link'});return `<div class="participant"><strong>${escapeHtml(participant.nickname)}${mine?' (나)':''}</strong><div class="meta">${escapeHtml(value)}${participant.completed_at?' · 완료':''}</div><div class="row">${mine?`<button class="secondary small" onclick="editEntry('${roomId}','${participant.keyword?'keyword':'link'}')">내 입력 수정</button>`:`<button class="secondary small" onclick="copyAndPreview('${roomId}','${participant.user_id}')">복사·열기</button><button class="primary small" ${visited?'disabled':''} onclick="visitMember('${roomId}','${participant.user_id}')">${visited?'방문 완료':'방문 완료 처리'}</button><button class="secondary small" onclick="reportMember('${roomId}','${participant.user_id}')">미이행 신고</button>`}</div></div>`}).join(''):'<p class="empty">참여자가 없습니다.</p>'; } catch(error) { box.innerHTML='<p class="notice">방에 참여한 뒤 참여자 정보를 볼 수 있습니다.</p>'; } }
-    window.editEntry=async(roomId,type)=>{const value=prompt(type==='keyword'?'새 키워드를 입력하세요.':'새 게시글 링크를 입력하세요.');if(!value)return;try{await api(`/api/rooms/${roomId}/participants`,{method:'PATCH',body:JSON.stringify(type==='keyword'?{keyword:value}:{linkUrl:value})});message('내 입력을 수정했습니다.');toggleDetail(roomId);toggleDetail(roomId)}catch(error){message(errorText[error.message]||'수정에 실패했습니다.',true)}};
-    function openValue(value,type){if(type==='keyword')window.open('https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query='+encodeURIComponent(value),'_blank','noopener,noreferrer');else window.open(value,'_blank','noopener,noreferrer')}
-    window.copyAndPreview=async(roomId,targetId)=>{const entry=participantValues.get(`${roomId}:${targetId}`);if(!entry?.value)return;try{await navigator.clipboard.writeText(entry.value);message('값을 복사하고 새 창으로 열었습니다.')}catch{message('새 창으로 열었습니다.')}openValue(entry.value,entry.type)};
-    window.visitMember=async(roomId,targetId)=>{const entry=participantValues.get(`${roomId}:${targetId}`);if(entry?.value)openValue(entry.value,entry.type);try{await api(`/api/rooms/${roomId}/visits/${targetId}`,{method:'POST'});message('방문 완료로 기록했습니다.');toggleDetail(roomId);toggleDetail(roomId)}catch(error){message(errorText[error.message]||'방문 처리에 실패했습니다.',true)}};
-    window.reportMember=async(roomId,targetId)=>{if(!confirm('해당 참여자를 미이행으로 신고할까요? 방 종료 후에만 패널티가 생성됩니다.'))return;try{await api(`/api/rooms/${roomId}/participant-reports/${targetId}`,{method:'POST'});message('신고했습니다.');}catch(error){message(errorText[error.message]||'신고할 수 없는 상태입니다.',true)}};
-    async function copyShareLink(roomId){const link=`${location.origin}/?roomId=${roomId}`;try{await navigator.clipboard.writeText(link);message('초대 링크를 복사했습니다.')}catch{prompt('아래 링크를 복사하세요.',link)}}
-    async function deleteRoom(roomId){if(!confirm('참여자가 없는 방만 삭제할 수 있습니다. 삭제할까요?'))return;try{await api(`/api/rooms/${roomId}`,{method:'DELETE'});message('방을 삭제했습니다.');loadRooms()}catch(error){message(errorText[error.message]||'방을 삭제할 수 없습니다.',true)}}
-    window.switchCreateType = type => { $('#createTabKw').classList.toggle('active',type==='keyword'); $('#createTabLk').classList.toggle('active',type==='link'); $('#createPane-keyword').classList.toggle('hidden',type!=='keyword'); $('#createPane-link').classList.toggle('hidden',type!=='link'); };
-    const selectedMissions = selector => [...document.querySelectorAll(selector+':checked')].map(input=>input.value);
-    async function createLegacyRoom(type) { const prefix=type==='keyword'?'kw':'lk'; const startAt=new Date($('#'+prefix+'Start').value).getTime(); const missions=selectedMissions('.'+prefix+'Mission'); const body={type,startAt,capacity:Number($('#'+prefix+'Cap').value),name:$('#'+prefix+'Name').value.trim(),missions}; if(type==='link'){body.waitMinutes=Number($('#lkWait').value);body.progressMinutes=Number($('#lkProgress').value);} if(!startAt||body.capacity<1||!missions.length){message('시작 시간, 모집 인원, 미션을 확인해주세요.',true);return;} try{await api('/api/rooms',{method:'POST',body:JSON.stringify(body)});message('방을 만들었습니다.');document.querySelector('[data-page="rooms"]').click();}catch(error){message(errorText[error.message]||'방 생성에 실패했습니다.',true);}}
-    window.createKw=()=>createLegacyRoom('keyword'); window.createLk=()=>createLegacyRoom('link');
-    async function loadMe() { try { const [activity,participations,penalties] = await Promise.all([api('/api/me/activity'),api('/api/me/participations'),api('/api/me/penalties')]); $('#activity').innerHTML = Object.entries(activity.days).map(([day,count]) => `${day}: <strong>${count}회</strong>`).join(' &nbsp; '); $('#participations').innerHTML = participations.participations.length ? participations.participations.map(room => `<article class="room"><strong>${escapeHtml(room.roomName)}</strong><div class="meta">${room.value || ''} · ${statusLabel(room.status)} · ${formatTime(room.joinedAt)}</div><button class="secondary small" onclick="showMyRoom('${room.roomId}')">참여자·방문 보기</button></article>`).join('') : '<p class="empty">참여 기록이 없습니다.</p>'; $('#penalties').innerHTML = penalties.penalties.length ? penalties.penalties.map(item => `<article class="room"><strong>${escapeHtml(item.roomName)}</strong><div class="meta">${escapeHtml(penaltyReasonLabel(item.reason))} · ${item.status}</div>${item.status==='unresolved'?`<button class="primary small" onclick="resolvePenalty('${item.id}')">패널티 이행 완료</button>`:''}</article>`).join('') : '<p class="empty">패널티가 없습니다.</p>'; } catch { message('마이 페이지를 불러오지 못했습니다.',true); } }
-    window.showMyRoom=async roomId=>{document.querySelector('[data-page="rooms"]').click();setTimeout(()=>toggleDetail(roomId),200)};
-    $('#copy-participations').onclick=async()=>{try{const {participations}=await api('/api/me/participations');const text=participations.map(room=>`${room.roomName} · ${room.value||''}`).join('\n');await navigator.clipboard.writeText(text);message('내 참여방 목록을 복사했습니다.')}catch{message('목록을 복사하지 못했습니다.',true)}};
-    window.resolvePenalty=async penaltyId=>{try{await api(`/api/penalties/${penaltyId}/resolve`,{method:'POST'});const session=await api('/api/auth/me');currentUser=session.user;message('패널티 이행 처리를 완료했습니다.');refreshAccountStatus();loadMe()}catch(error){message(errorText[error.message]||'방문 완료 후 패널티를 해결할 수 있습니다.',true)}};
-    async function loadSharedRoom(){const roomId=new URLSearchParams(location.search).get('roomId');if(!roomId)return;try{const {room}=await api('/api/rooms/'+roomId);$('#shared-room').classList.remove('hidden');$('#shared-room').innerHTML=`<h2>초대받은 품앗이방</h2><strong>${escapeHtml(room.name)}</strong><div class="meta">${room.missions.join(', ')} · ${statusLabel(room.status)}</div><button class="primary" onclick="joinRoom('${room.id}','${room.type}')">이 방 참여하기</button>`}catch{message('초대 링크의 방을 찾을 수 없습니다.',true)}}
-    function escapeHtml(value) { const element = document.createElement('span'); element.textContent = value || ''; return element.innerHTML; }
-    bootstrap();loadSharedRoom();
-  </script>
+
+  <div class="bottomnav" id="bottomNav" style="display:none;">
+    <button class="tabBtn active" onclick="switchTab('rooms')"><span class="ic">🏠</span>방목록</button>
+    <button class="tabBtn" onclick="switchTab('create')"><span class="ic">➕</span>방만들기</button>
+    <button class="tabBtn" onclick="switchTab('my')"><span class="ic">👤</span>마이</button>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-msg" id="modalMsg"></div>
+      <button class="btn" id="modalConfirmBtn" onclick="closeModal()">확인</button>
+    </div>
+  </div>
+
+  <div id="joinModalOverlay" class="modal-overlay hidden">
+    <div class="modal-box modal-box-form">
+      <div class="modal-title" id="joinModalTitle">참여하기</div>
+      <label id="joinModalLabel">등록할 값</label>
+      <input id="joinModalInput" placeholder="" onkeydown="if(event.key==='Enter') submitJoinModal()">
+      <div class="modal-btnrow">
+        <button class="btn ghost" onclick="closeJoinModal()">취소</button>
+        <button class="btn" id="joinModalSubmitBtn" onclick="submitJoinModal()">참여하기</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // SQLite API adapter: the legacy UI below is intentionally preserved.
+  let currentUser = null;
+  let myParticipationsCache = [];
+  let currentRoomType = '키워드';
+  const roomCache = new Map(), participantCache = new Map();
+  const typeName = v => v === 'keyword' ? '키워드' : '링크';
+  const statusName = v => ({waiting:'대기',in_progress:'진행중',closed:'마감',deleted:'삭제'})[v] || v;
+  const reasonName = v => ({auto_incomplete:'미완료(자동)',participant_report:'참여자신고',admin:'운영자 처리'})[v] || v;
+  const timeText = v => v ? new Date(v).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+  const errText = e => ({authentication_required:'로그인이 필요해요.',account_not_approved:'승인된 회원만 이용할 수 있어요.',unresolved_penalty:'패널티 상태에서는 이용할 수 없어요.',room_full:'모집이 마감되었습니다.',room_not_started:'아직 참여 시간이 아닙니다.',room_join_closed:'참여가 마감되었습니다.',room_closed:'마감된 방입니다.',room_not_closed:'마감 후 신고할 수 있습니다.',room_participant_required:'방 참여자만 이용할 수 있습니다.',room_not_completed:'놓친 방문을 먼저 완료해주세요.',invalid_credentials:'닉네임 또는 비밀번호가 맞지 않습니다.',approval_pending:'운영자 승인을 기다리고 있습니다.',account_rejected:'가입 신청이 반려되었습니다.'})[e] || '요청을 처리하지 못했습니다.';
+  async function api(path, options={}) { const r=await fetch(path,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'request_failed');return d; }
+  function room(row){const r={'RoomID':row.id,'방이름':row.name,'유형':typeName(row.type),'생성자':row.creator?.nickname||'-','미션':(row.missions||[]).join(', '),'모집인원':row.capacity,'현재참석':row.participantCount||0,'정원마감여부':!!row.isFull,'시작시간':timeText(row.joinStartsAt),'대기종료시각':timeText(row.joinEndsAt),'마감시각':timeText(row.closesAt),'상태':statusName(row.status)};roomCache.set(r.RoomID,r);return r;}
+  async function legacyUser(user){const p=(await api('/api/me/penalties')).penalties||[];return {'닉네임':user.nickname,'계정상태':user.accountStatus==='locked'?'잠금':'정상','패널티상태':p.some(x=>x.status==='unresolved')?'패널티':'정상',id:user.id};}
+  function initApi(){return true;} function saveApiUrl(){boot();}
+  async function apiGet(action,p={}){try{
+    if(action==='getTodayRooms'){const x=await api('/api/rooms?type='+(p.type==='링크'?'link':'keyword'));return x.rooms.map(room);}
+    if(action==='getRoomPreview'){return room((await api('/api/rooms/'+p.roomId)).room);}
+    if(action==='getRoomParticipants'){const x=await api('/api/rooms/'+p.roomId+'/participants');const rows=x.participants.map(v=>({'닉네임':v.nickname,'블로그명':v.blog_name,'개인키워드':v.keyword||'','개인링크':v.link_url||'','완료여부':v.completed_at?'완료':'미완료',userId:v.user_id}));participantCache.set(p.roomId,{rows,visits:x.myVisitedTargetIds||[]});return rows;}
+    if(action==='getMyVisits'){if(!participantCache.has(p.roomId))await apiGet('getRoomParticipants',p);const x=participantCache.get(p.roomId);return x.rows.filter(v=>x.visits.includes(v.userId)).map(v=>v['닉네임']);}
+    if(action==='getRooms')return [...roomCache.values()];
+    if(action==='getMyParticipations'){const x=await api('/api/me/participations');return x.participations.map(v=>({'RoomID':v.roomId,'방이름':v.roomName,'유형':typeName(v.roomType),'참여시각':timeText(v.joinedAt),'완료여부':v.completedAt?'완료':'미완료'}));}
+    if(action==='getWeeklyCalendar')return (await api('/api/me/activity')).days;
+    if(action==='getPenaltyRooms'){const x=await api('/api/me/penalties');return x.penalties.filter(v=>v.status==='unresolved').map(v=>({'PenaltyID':v.id,'RoomID':v.roomId,'사유':reasonName(v.reason),'발생일':timeText(v.issuedAt),'해제여부':'미해제'}));}
+    return [];
+  }catch(e){return {error:errText(e.message)};}}
+  async function apiPost(action,p={}){try{
+    if(action==='signup'){await api('/api/auth/signup',{method:'POST',body:JSON.stringify(p)});return {success:true};}
+    if(action==='loginAndBootstrap'){const x=await api('/api/auth/login',{method:'POST',body:JSON.stringify({nickname:p.nickname,password:p.password})});return {success:true,user:await legacyUser(x.user),rooms:await apiGet('getTodayRooms',{type:p.roomType})};}
+    if(action==='deleteRoom'){await api('/api/rooms/'+p.roomId,{method:'DELETE'});return {success:true};}
+    if(action==='createKeywordRoom'||action==='createLinkRoom'){const keyword=action==='createKeywordRoom',body={type:keyword?'keyword':'link',startAt:new Date(p.startTime).getTime(),capacity:Number(p.capacity),missions:p.missions,name:p.roomName};if(!keyword){body.waitMinutes=Number(p.waitMin);body.progressMinutes=Number(p.progressMin);}const x=await api('/api/rooms',{method:'POST',body:JSON.stringify(body)});const created=room(x.room);return {success:true,roomId:created.RoomID,roomName:created['방이름'],rooms:await apiGet('getTodayRooms',{type:keyword?'키워드':'링크'})};}
+    if(action==='join'||action==='updateMyEntry'){const r=roomCache.get(p.roomId),kw=(r?.['유형']||'키워드')==='키워드',body=action==='join'?(kw?{keyword:p.personalKeyword}:{linkUrl:p.personalLink}):(kw?{keyword:p.value}:{linkUrl:p.value});await api('/api/rooms/'+p.roomId+'/participants',{method:action==='join'?'POST':'PATCH',body:JSON.stringify(body)});return {success:true};}
+    if(action==='visit'||action==='reportMissing'){const rows=await apiGet('getRoomParticipants',{roomId:p.roomId}),target=rows.find(v=>v['닉네임']===p.targetNickname);if(!target)throw new Error('room_participant_required');await api('/api/rooms/'+p.roomId+(action==='visit'?'/visits/':'/participant-reports/')+target.userId,{method:'POST'});return {success:true};}
+    if(action==='releasePenaltySelf'){await api('/api/penalties/'+p.penaltyId+'/resolve',{method:'POST'});return {success:true};}
+    return {success:false,message:'지원하지 않는 요청입니다.'};
+  }catch(e){return {success:false,message:errText(e.message)};}}
+  // 화면 4개(서버설정/부팅로딩/로그인폼/앱본체) 중 지정한 것만 보이게 하는 확정적 헬퍼.
+  // CSS class="hidden" 토글뿐 아니라 style.display도 직접 강제로 지정해서,
+  // 혹시 다른 원인으로 hidden 클래스가 안 먹더라도 무조건 화면이 맞게 전환되도록 함.
+  function showScreen(idToShow){
+    ['apiConfigBar','bootLoading','authSection','appSection'].forEach(function(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(id === idToShow){
+        el.classList.remove('hidden');
+        el.style.display = '';
+      } else {
+        el.classList.add('hidden');
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  function showMsg(text, type){
+    const box = document.getElementById('msgBox');
+    box.innerHTML = '<div class="msg ' + (type||'ok') + '">' + text + '</div>';
+    setTimeout(()=>{ box.innerHTML=''; }, 3000);
+  }
+
+  // 버튼 로딩상태 공통 헬퍼 (여러 곳에서 반복되던 disable+스피너 처리를 정리)
+  function setBtnLoading(btn, text){
+    if(!btn) return;
+    btn.dataset.originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> ' + text;
+  }
+  function clearBtnLoading(btn, fallbackText){
+    if(!btn) return;
+    btn.disabled = false;
+    btn.innerHTML = btn.dataset.originalHtml || fallbackText || '';
+  }
+
+  let modalOnConfirm = null;
+  function openModal(text, onConfirm){
+    document.getElementById('modalMsg').textContent = text;
+    modalOnConfirm = onConfirm || null;
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+  function closeModal(){
+    document.getElementById('modalOverlay').classList.add('hidden');
+    const cb = modalOnConfirm;
+    modalOnConfirm = null;
+    if(cb) cb();
+  }
+
+  function switchAuth(mode){
+    document.getElementById('tabLoginBtn').classList.toggle('active', mode==='login');
+    document.getElementById('tabSignupBtn').classList.toggle('active', mode==='signup');
+    document.getElementById('loginForm').classList.toggle('hidden', mode!=='login');
+    document.getElementById('signupForm').classList.toggle('hidden', mode!=='signup');
+  }
+
+  function doSignup(){
+    const btn = document.getElementById('signupBtn');
+    if(btn.disabled) return;
+    const nick = document.getElementById('suNick').value.trim();
+    const pw = document.getElementById('suPw').value;
+    const blog = document.getElementById('suBlog').value.trim();
+    const blogName = document.getElementById('suBlogName').value.trim();
+    if(!nick||!pw||!blog||!blogName){ showMsg('모든 항목을 입력해주세요.','err'); return; }
+    if(nick.length < 2){ showMsg('닉네임은 2자 이상 입력해주세요.','err'); return; }
+    if(pw.length < 4){ showMsg('비밀번호는 4자 이상 입력해주세요.','err'); return; }
+    if(!/^https?:\/\//i.test(blog)){ showMsg('블로그 주소는 http(s):// 로 시작해야 해요.','err'); return; }
+
+    setBtnLoading(btn, '가입 처리중');
+    apiPost('signup', { nickname: nick, password: pw, blogUrl: blog, blogName: blogName }).then(res=>{
+      clearBtnLoading(btn, '가입 신청하기');
+      if(res.success){
+        document.getElementById('suNick').value = '';
+        document.getElementById('suPw').value = '';
+        document.getElementById('suBlog').value = '';
+        document.getElementById('suBlogName').value = '';
+        openModal('가입신청이 완료되었습니다.\n관리자 승인 후 이용 가능합니다.', function(){
+          switchAuth('login');
+        });
+      } else openModal(res.message, null);
+    }).catch(function(){
+      clearBtnLoading(btn, '가입 신청하기');
+      showMsg('오류가 발생했습니다. 다시 시도해주세요.','err');
+    });
+  }
+
+  function performLogin(nick, pw, showErrors){
+    return apiPost('loginAndBootstrap', { nickname: nick, password: pw, roomType: currentRoomType }).then(res=>{
+      if(res.success){
+        currentUser = res.user;
+        try { localStorage.setItem('PUMASI_SESSION', JSON.stringify({ nickname: nick, password: pw })); } catch(e){}
+        showScreen('appSection');
+        document.getElementById('bottomNav').style.display = 'flex';
+        document.getElementById('userInfoBar').innerHTML = '<button class="iconbtn" onclick="logout()">로그아웃</button>';
+        const restricted = renderDashboard();
+        if(restricted){
+          switchTabProgrammatic('my');
+        } else if(sharedRoomFocusMode){
+          loadRooms(); // 초대링크 포커스모드면 목록 대신 안내문구를 보여줘야 하므로 별도 처리
+        } else {
+          // 로그인 응답에 이미 방목록이 함께 왔으므로, 재조회 없이 바로 그려서 서버 왕복을 한 번 아낀다
+          renderRoomListHTML(res.rooms || []);
+        }
+        if(sharedRoomId) loadSharedRoomPreview();
+      } else {
+        try { localStorage.removeItem('PUMASI_SESSION'); } catch(e){}
+        showScreen('authSection');
+        if(showErrors) showMsg(res.message,'err');
+      }
+    }).catch(()=>{
+      showScreen('authSection');
+    });
+  }
+
+  function doLogin(){
+    const btn = document.getElementById('loginBtn');
+    if(btn.disabled) return;
+    const nick = document.getElementById('loginNick').value.trim();
+    const pw = document.getElementById('loginPw').value;
+    if(!nick || !pw){ showMsg('닉네임과 비밀번호를 입력해주세요.','err'); return; }
+    setBtnLoading(btn, '로그인 중');
+    performLogin(nick, pw, true).finally(function(){
+      clearBtnLoading(btn, '로그인');
+    });
+  }
+
+  // 저장된 세션이 있으면 로그인 화면을 먼저 보여주지 않고, 확인 중 로딩만 표시한 뒤
+  // 결과에 따라 바로 앱 화면 또는 로그인 화면으로 전환 (새로고침 시 화면 깜빡임 방지)
+  // ===================== 공유 링크(?room=RoomID) 미리보기 =====================
+  // 카톡방 등에 "이거 같이해요" 링크로 공유했을 때, 로그인 여부와 무관하게
+  // 방 기본정보를 보여주고 비회원은 가입을, 회원은 그 방 참여를 유도한다.
+  // 참여 자체는 기존 openJoinModal()을 그대로 재사용 (참여 로직 중복 없음).
+  let sharedRoomId = null;
+  let sharedRoomFocusMode = false; // true면 초대받은 방에 집중시키기 위해 일반 방목록은 접어둠
+
+  function initSharedRoomFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    sharedRoomId = params.get('room') || params.get('roomId');
+    if(sharedRoomId){
+      sharedRoomFocusMode = true;
+      loadSharedRoomPreview();
+    }
+  }
+
+  function loadSharedRoomPreview(){
+    apiGet('getRoomPreview', { roomId: sharedRoomId }).then(function(r){
+      const box = document.getElementById('sharedRoomPreview');
+      const body = document.getElementById('sharedRoomBody');
+      if(!r || r.error){
+        body.innerHTML = '<div class="empty">'+(r && r.error ? r.error : '방을 찾을 수 없어요.')+'</div>';
+        box.classList.remove('hidden');
+        return;
+      }
+      const chipClass = r['상태']==='마감' ? 'gray' : (r['상태']==='진행중' ? 'ok' : 'wait');
+      const typeClass = r['유형']==='키워드' ? 'type-keyword' : 'type-link';
+      let html = '<div class="roomcard '+typeClass+'">'
+        + '<div class="top"><div><span class="typechip '+typeClass+'">'+r['유형']+'</span>'+(r['방이름']||r['RoomID'])+'</div>'
+        + '<span class="chip '+chipClass+'">'+r['상태']+'</span></div>'
+        + '<div class="meta">'+r['생성자']+' · '+(r['미션']||'-')+'</div>'
+        + '<div class="meta">👥 '+r['현재참석']+'/'+r['모집인원']+'명 · 🕐 '+timeOnly(r['시작시간'])+' 시작 · 🏁 '+timeOnly(r['마감시각'])+' 마감</div>';
+
+      if(r['상태'] !== '대기'){
+        html += '<div class="actions"><button class="btn small" disabled>지금은 참여할 수 없는 방이에요</button></div>';
+      } else if(r['정원마감여부']){
+        html += '<div class="actions"><button class="btn small" disabled>모집마감</button></div>';
+      } else if(currentUser){
+        html += '<div class="actions"><button class="btn small" onclick="openJoinModal(\''+r['RoomID']+'\',\''+r['유형']+'\')">참여하기</button></div>';
+      } else {
+        html += '<div class="actions">'
+          + '<button class="btn small" onclick="goLoginFromShare()">로그인하고 참여하기</button>'
+          + '<button class="btn small ghost" onclick="goSignupFromShare()">처음이라면 회원가입</button>'
+          + '</div>'
+          + '<p class="muted" style="margin-top:6px;">가입 후엔 운영자 승인이 필요해요.</p>';
+      }
+      html += '</div>';
+      body.innerHTML = html;
+      box.classList.remove('hidden');
+    });
+  }
+
+  function copyShareLink(roomId){
+    const base = window.location.origin + window.location.pathname;
+    copyText(base + '?room=' + roomId);
+  }
+
+  function goLoginFromShare(){
+    switchAuth('login');
+    document.getElementById('loginNick').focus();
+    document.getElementById('loginForm').scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  function goSignupFromShare(){
+    switchAuth('signup');
+    document.getElementById('suNick').focus();
+    document.getElementById('signupForm').scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  async function boot(){
+    try { showScreen('bootLoading'); const me=await api('/api/auth/me'); currentUser=await legacyUser(me.user); showScreen('appSection'); document.getElementById('bottomNav').style.display='flex'; document.getElementById('userInfoBar').innerHTML='<button class="iconbtn" onclick="logout()">로그아웃</button>'; const restricted=renderDashboard(); if(restricted) switchTabProgrammatic('my'); else loadRooms(); if(sharedRoomId) loadSharedRoomPreview(); } catch(e) { showScreen('authSection'); }
+  }
+
+  function logout(){
+    fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'});
+    currentUser = null;
+    try { localStorage.removeItem('PUMASI_SESSION'); } catch(e){}
+    showScreen('authSection');
+    document.getElementById('bottomNav').style.display = 'none';
+    document.getElementById('userInfoBar').innerHTML = '';
+    if(sharedRoomId) loadSharedRoomPreview();
+  }
+
+  function renderDashboard(){
+    // 방어코드: 대시보드가 그려지는 시점엔 로그인 폼이 항상 숨겨져 있어야 함
+    showScreen('appSection');
+
+    const hasPenalty = currentUser['패널티상태'] === '패널티';
+    const isLocked = currentUser['계정상태'] === '잠금';
+    const restricted = hasPenalty || isLocked;
+    document.getElementById('badgeBar').innerHTML =
+      '<div class="statuspill user">👤 '+currentUser['닉네임']+'</div>'
+      + '<div class="statuspill '+(hasPenalty?'alert':'safe')+'">패널티 '+(hasPenalty?'있음 ⚠️':'없음 ✅')+'</div>'
+      + '<div class="statuspill '+(isLocked?'alert':'safe')+'">계정잠금 '+(isLocked?'있음 🔒':'없음 ✅')+'</div>';
+
+    let bannerText = '';
+    if(isLocked) bannerText = '🔒 계정이 잠겨있어요. 아래 "마이" 탭에서 패널티 내역을 확인하고 해결해주세요. 방목록/방만들기는 잠금 해제 후 이용 가능합니다.';
+    else if(hasPenalty) bannerText = '⚠️ 패널티가 있어 방목록/방만들기를 이용할 수 없어요. "마이" 탭에서 놓친 품앗이를 완료하고 패널티를 해제해주세요.';
+    document.getElementById('lockBanner').textContent = bannerText;
+    document.getElementById('lockBanner').classList.toggle('hidden', !restricted);
+    document.querySelectorAll('.bottomnav .tabBtn')[0].disabled = restricted;
+    document.querySelectorAll('.bottomnav .tabBtn')[1].disabled = restricted;
+
+    return restricted; // 이 다음 뭘 로드할지는 호출한 쪽에서 결정 (여기서 재호출하면 무한루프 위험)
+  }
+
+  let hasLeftRoomsTab = false; // 방목록 탭을 벗어난 적이 있는지 (한번만 포커스모드 유지용)
+
+  // 탭 전환 시 공통으로 거치는 처리: 방목록 탭을 벗어났다가 다시 돌아오면
+  // 초대링크 포커스모드를 자동으로 풀어서(한번만 보여주고) 전체 목록이 보이게 함
+  function handleTabVisit(tab){
+    if(tab !== 'rooms'){ hasLeftRoomsTab = true; return; }
+    if(sharedRoomFocusMode && hasLeftRoomsTab) sharedRoomFocusMode = false;
+  }
+
+  function switchTab(tab){
+    const restricted = currentUser && (currentUser['계정상태']==='잠금' || currentUser['패널티상태']==='패널티');
+    if(restricted && tab!=='my'){
+      showMsg('패널티/잠금 상태에서는 이용할 수 없어요. 마이 탭에서 확인해주세요.','err');
+      return;
+    }
+    ['rooms','create','my'].forEach(t=>{
+      document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+    });
+    document.querySelectorAll('.bottomnav .tabBtn').forEach(b=>b.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    handleTabVisit(tab);
+    if(tab==='rooms') loadRooms();
+    if(tab==='my') loadMyInfo();
+  }
+
+  function switchTabProgrammatic(tab, skipLoad){
+    ['rooms','create','my'].forEach(t=>{
+      document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+    });
+    const idx = tab==='rooms'?0:(tab==='create'?1:2);
+    document.querySelectorAll('.bottomnav .tabBtn').forEach((b,i)=> b.classList.toggle('active', i===idx));
+    handleTabVisit(tab);
+    if(skipLoad) return;
+    if(tab==='rooms') loadRooms();
+    if(tab==='my') loadMyInfo();
+  }
+
+  function toggleMission(label){
+    const cb = label.querySelector('input');
+    setTimeout(()=> label.classList.toggle('checked', cb.checked), 0);
+  }
+  function switchCreateType(type){
+    document.getElementById('createTabKw').classList.toggle('active', type==='keyword');
+    document.getElementById('createTabLk').classList.toggle('active', type==='link');
+    document.getElementById('createPane-keyword').classList.toggle('hidden', type!=='keyword');
+    document.getElementById('createPane-link').classList.toggle('hidden', type!=='link');
+  }
+  function switchRoomType(type, skipLoad){
+    currentRoomType = type;
+    document.getElementById('roomTabKw').classList.toggle('active', type==='키워드');
+    document.getElementById('roomTabLk').classList.toggle('active', type==='링크');
+    document.getElementById('roomListTitle').textContent = '🔥 오늘의 ' + type + '방';
+    const card = document.getElementById('roomListCard');
+    card.classList.toggle('type-keyword-pane', type==='키워드');
+    card.classList.toggle('type-link-pane', type==='링크');
+    if(!skipLoad) loadRooms();
+  }
+
+  function hourFrom(inputId){
+    const v = document.getElementById(inputId).value;
+    if(!v) return null;
+    return new Date(v).getHours();
+  }
+  function updatePreview(prefix){
+    const h = hourFrom(prefix+'Start');
+    const missions = Array.from(document.querySelectorAll('.'+prefix+'Mission:checked')).map(c=>c.value);
+    const label = missions.length ? missions.join(' ') : '품앗이';
+    const txt = (h===null? '' : h+'시 ') + label + '방';
+    document.getElementById(prefix+'Preview').textContent = '미리보기: ' + txt;
+  }
+
+  function timeOnly(str){
+    if(!str) return '-';
+    const parts = String(str).split(' ');
+    return parts.length>1 ? parts[1].slice(0,5) : str;
+  }
+
+  function loadRooms(){
+    if(sharedRoomFocusMode){
+      document.getElementById('roomList').innerHTML =
+        '<div class="empty">🔗 위에서 초대받은 방을 먼저 확인해주세요.<br><span class="muted">다른 탭에 다녀오시면 전체 방목록도 볼 수 있어요.</span></div>';
+      return Promise.resolve();
+    }
+    document.getElementById('roomList').innerHTML = '<div class="loading">불러오는 중...</div>';
+    return apiGet('getTodayRooms', { type: currentRoomType }).then(rooms=>{
+      renderRoomListHTML(rooms);
+    });
+  }
+
+  // 방목록 화면 그리기만 담당 (데이터는 로그인 시 함께 받아온 것을 재사용할 수도, 새로 조회한 것일 수도 있음)
+  function renderRoomListHTML(rooms){
+      if(!rooms.length){ document.getElementById('roomList').innerHTML = '<div class="empty">오늘 운영 중인 '+currentRoomType+'방이 없어요 🙂</div>'; return; }
+      let html = '';
+      rooms.slice().reverse().forEach(r=>{
+        const chipClass = r['상태']==='마감' ? 'gray' : (r['상태']==='진행중' ? 'ok' : 'wait');
+        const name = r['방이름'] || r['RoomID'];
+        const isOwner = currentUser && r['생성자'] === currentUser['닉네임'];
+        const isFull = r['정원마감여부'];
+        let joinBtn = '';
+        if(r['상태']==='대기'){
+          joinBtn = isFull
+            ? '<button class="btn small" disabled>모집마감</button>'
+            : '<button class="btn small" id="joinbtn-'+r['RoomID']+'" onclick="openJoinModal(\''+r['RoomID']+'\',\''+r['유형']+'\')">참여하기</button>';
+        }
+        html += '<div class="roomcard '+(r['유형']==='키워드'?'type-keyword':'type-link')+'">'
+          + '<div class="top"><div><div class="name"><span class="typechip '+(r['유형']==='키워드'?'type-keyword':'type-link')+'">'+r['유형']+'</span>'+name+'</div><div class="meta">'+r['생성자']+' · '+(r['미션']||'-')+'</div></div>'
+          + '<span class="chip '+chipClass+'">'+r['상태']+'</span></div>'
+          + '<div class="meta roomtime">👥 '+r['현재참석']+'/'+r['모집인원']+'명 · 🕐 '+timeOnly(r['시작시간'])+' 시작 · ⏳~'+timeOnly(r['대기종료시각'])+' · 🏁 '+timeOnly(r['마감시각'])+' 마감</div>'
+          + '<div class="actions">'
+          + joinBtn
+          + '<button class="btn small ghost" onclick="toggleDetail(\''+r['RoomID']+'\')">참여자보기</button>'
+          + '<button class="btn small ghost" onclick="copyShareLink(\''+r['RoomID']+'\')">🔗 링크복사</button>'
+          + (isOwner ? '<button class="btn small outline" onclick="deleteRoomUI(\''+r['RoomID']+'\')">삭제</button>' : '')
+          + '</div><div id="detail-'+r['RoomID']+'"></div>'
+          + '</div>';
+      });
+      document.getElementById('roomList').innerHTML = html;
+  }
+
+  function deleteRoomUI(roomId){
+    if(!confirm('이 방을 삭제할까요? 참여자가 있으면 삭제할 수 없어요.')) return;
+    apiPost('deleteRoom', { roomId: roomId, nickname: currentUser['닉네임'] }).then(res=>{
+      if(res.success){ showMsg('방이 삭제되었습니다.'); loadRooms(); }
+      else showMsg(res.message,'err');
+    });
+  }
+
+  // ===================== 참여 모달 (기존 prompt() 방식 대체) =====================
+  // 참여하기 클릭 -> 모달에서 키워드/링크 입력 -> 참여 성공 시 자동으로 참여자보기까지 열어줌
+  let joinModalCtx = null;
+
+  function openJoinModal(roomId, type){
+    if(!currentUser){ showMsg('로그인이 필요해요.','err'); return; }
+    joinModalCtx = { roomId: roomId, type: type, mode: 'join' };
+    document.getElementById('joinModalTitle').textContent = (type==='키워드' ? '⌨️ 키워드 등록하고 참여하기' : '🔗 링크 등록하고 참여하기');
+    document.getElementById('joinModalLabel').textContent = (type==='키워드' ? '등록할 키워드' : '본인 게시글 링크');
+    const input = document.getElementById('joinModalInput');
+    input.value = '';
+    input.placeholder = (type==='키워드' ? '예: 강남맛집 추천' : 'https://blog.naver.com/...');
+    document.getElementById('joinModalSubmitBtn').textContent = '참여하기';
+    document.getElementById('joinModalOverlay').classList.remove('hidden');
+    setTimeout(()=> input.focus(), 50);
+  }
+
+  // 이미 등록한 키워드/링크를 본인이 직접 수정 (오타 등 실수 정정용, 마감 전까지만 가능)
+  function openEditModal(roomId, type, currentValue){
+    joinModalCtx = { roomId: roomId, type: type, mode: 'edit' };
+    document.getElementById('joinModalTitle').textContent = (type==='키워드' ? '✏️ 키워드 수정' : '✏️ 링크 수정');
+    document.getElementById('joinModalLabel').textContent = (type==='키워드' ? '수정할 키워드' : '수정할 링크');
+    const input = document.getElementById('joinModalInput');
+    input.value = currentValue || '';
+    input.placeholder = (type==='키워드' ? '예: 강남맛집 추천' : 'https://blog.naver.com/...');
+    document.getElementById('joinModalSubmitBtn').textContent = '수정하기';
+    document.getElementById('joinModalOverlay').classList.remove('hidden');
+    setTimeout(()=> input.focus(), 50);
+  }
+
+  function closeJoinModal(){
+    document.getElementById('joinModalOverlay').classList.add('hidden');
+    joinModalCtx = null;
+  }
+
+  function submitJoinModal(){
+    if(!joinModalCtx) return;
+    const roomId = joinModalCtx.roomId, type = joinModalCtx.type, mode = joinModalCtx.mode || 'join';
+    const val = document.getElementById('joinModalInput').value.trim();
+    if(!val){ showMsg(type==='키워드' ? '키워드를 입력해주세요.' : '링크를 입력해주세요.', 'err'); return; }
+    if(type==='링크' && !/^https?:\/\//i.test(val)){ showMsg('링크는 http(s):// 로 시작해야 해요.','err'); return; }
+
+    const btn = document.getElementById('joinModalSubmitBtn');
+    setBtnLoading(btn, mode==='edit' ? '수정 처리중' : '참여 처리중');
+
+    const action = mode==='edit' ? 'updateMyEntry' : 'join';
+    const payload = mode==='edit'
+      ? { roomId: roomId, nickname: currentUser['닉네임'], value: val }
+      : { roomId: roomId, nickname: currentUser['닉네임'], personalKeyword: type==='키워드'?val:'', personalLink: type==='링크'?val:'' };
+
+    apiPost(action, payload).then(res=>{
+      clearBtnLoading(btn, mode==='edit' ? '수정하기' : '참여하기');
+      if(res.success){
+        closeJoinModal();
+        if(mode==='edit'){
+          showMsg('수정되었습니다.');
+          const box = document.getElementById('detail-'+roomId);
+          if(box) renderRoomDetail(roomId, box);
+        } else {
+          showMsg('참여 완료! 참여자 목록을 보여드릴게요.');
+          if(sharedRoomFocusMode && roomId === sharedRoomId) sharedRoomFocusMode = false;
+          // 참여하기 -> 등록 -> 자동으로 참여자보기까지 이어지도록 (목록 갱신 후 상세 오픈)
+          loadRooms().then(()=>{
+            const box = document.getElementById('detail-'+roomId);
+            if(box){
+              box.dataset.open = '1';
+              renderRoomDetail(roomId, box);
+              box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        }
+      } else {
+        showMsg(res.message,'err');
+      }
+    }).catch(()=>{
+      clearBtnLoading(btn, mode==='edit' ? '수정하기' : '참여하기');
+      showMsg('오류가 발생했습니다. 다시 시도해주세요.','err');
+    });
+  }
+
+  function toggleDetail(roomId){
+    const box = document.getElementById('detail-'+roomId);
+    if(box.dataset.open === '1'){ box.innerHTML=''; box.dataset.open='0'; return; }
+    box.dataset.open = '1';
+    renderRoomDetail(roomId, box, false);
+  }
+
+  function renderRoomDetail(roomId, box, penaltyMode){
+    box.innerHTML = '<div class="loading">불러오는 중...</div>';
+    Promise.all([
+      apiGet('getRoomParticipants', { roomId: roomId, nickname: currentUser['닉네임'] }),
+      apiGet('getMyVisits', { roomId: roomId, nickname: currentUser['닉네임'] }),
+      apiGet('getRooms')
+    ]).then(function(results){
+      const list = results[0], myVisits = results[1], allRooms = results[2];
+      if(list && list.error){ box.innerHTML = '<div class="empty" style="padding:14px 0;">'+list.error+'</div>'; return; }
+      const room = allRooms.find(function(r){ return r['RoomID']===roomId; }) || {};
+      const isClosed = room['상태']==='마감';
+      // 마감 후엔 원칙적으로 방문(완료처리) 불가 - 복사만 제공. 단, 패널티 해제 화면(penaltyMode)에서는
+      // 실제로 그 방에서 패널티를 받은 사람만 예외적으로 방문을 계속할 수 있음 (서버에서도 동일하게 검증됨)
+      const visitDisabled = isClosed && !penaltyMode;
+      const isKeyword = room['유형']==='키워드';
+      const visitLabel = '방문'; // 키워드방/링크방 모두 동일한 용어로 통일
+      const typeClass = isKeyword ? 'type-keyword' : 'type-link';
+      if(!list.length){ box.innerHTML = '<div class="empty" style="padding:14px 0;">아직 참여자가 없어요.<br><button class="btn small ghost" style="width:auto;margin-top:8px;" onclick="renderRoomDetail(\''+roomId+'\', this.closest(\'.empty\').parentNode, '+(penaltyMode?'true':'false')+')">🔄 새로고침</button></div>'; return; }
+      // 내 항목이 항상 맨 위에 오도록 정렬 (참여 순서대로만 두면 내 위치가 매번 달라져서 헷갈림)
+      list.sort(function(a,b){
+        const aMe = a['닉네임']===currentUser['닉네임'] ? 0 : 1;
+        const bMe = b['닉네임']===currentUser['닉네임'] ? 0 : 1;
+        return aMe - bMe;
+      });
+      let html = '<div class="detail-refresh"><button class="btn small ghost" onclick="renderRoomDetail(\''+roomId+'\', this.closest(\'.detail-refresh\').parentNode, '+(penaltyMode?'true':'false')+')">🔄 새로고침</button></div>';
+      html += '<div class="participantlist '+typeClass+'">';
+      list.forEach(function(p){
+        const isMe = p['닉네임'] === currentUser['닉네임'];
+        const visited = myVisits.indexOf(p['닉네임']) !== -1;
+        const doneBadge = p['완료여부']==='완료' ? 'ok' : 'wait';
+        const blogName = p['블로그명'] || '';
+        html += '<div class="participantitem">'
+          + '<div class="pinfo"><div class="pname">'+p['닉네임']+(isMe?' (나)':'')+'</div>';
+        if(isMe){
+          const myVal = room['유형']==='키워드' ? p['개인키워드'] : p['개인링크'];
+          const escMyVal = (myVal||'').replace(/'/g,"\\'");
+          html += '<div class="meta">내 등록값: '+(myVal||'-')+'</div></div>'
+            + '<div class="pactions">'
+            + '<span class="statuschip '+doneBadge+'">'+(p['완료여부']==='완료'?'✅ 완료':'⏳ '+p['완료여부'])+'</span>';
+          if(!isClosed){
+            html += '<button class="btn small ghost" onclick="openEditModal(\''+roomId+'\',\''+room['유형']+'\',\''+escMyVal+'\')">✏️ 수정</button>';
+          }
+          html += '</div></div>';
+        } else {
+          const val = room['유형']==='키워드' ? p['개인키워드'] : p['개인링크'];
+          const escVal = (val||'').replace(/'/g,"\\'");
+          html += '<div class="meta">'+(val||'-')+'</div>';
+          if(isKeyword && blogName){
+            html += '<div class="meta" style="color:var(--type-keyword);font-weight:700;">📖 블로그명: '+blogName+'</div>';
+          }
+          html += '</div>'
+            + '<div class="pactions">'
+            + '<span class="statuschip '+(visited?'ok':'wait')+'">'+(visited?'✅ '+visitLabel+'완료':'⏳ '+visitLabel+'대기')+'</span>'
+            + '<div class="btnrow">'
+            + '<button class="btn small ghost" onclick="copyAndPreview(\''+escVal+'\',\''+room['유형']+'\')">📋 복사</button>';
+          if(visitDisabled){
+            html += '<button class="btn small ghost" disabled title="마감된 방은 방문할 수 없어요">🔒 마감</button>';
+          } else {
+            html += '<button class="btn small '+(visited?'visited':'visit')+' '+typeClass+'" id="visitbtn-'+roomId+'-'+p['닉네임']+'" onclick="visitUI(\''+roomId+'\',\''+p['닉네임']+'\',\''+escVal+'\',\''+room['유형']+'\',this)">'+(visited?'✔ '+visitLabel+'완료':'👉 '+visitLabel)+'</button>';
+          }
+          if(isClosed && !penaltyMode){
+            html += '<button class="btn small outline" onclick="reportMissingUI(\''+roomId+'\',\''+p['닉네임']+'\',this)">🚩 신고</button>';
+          }
+          html += '</div></div></div>';
+        }
+      });
+      html += '</div>';
+
+      if(isClosed && !penaltyMode){
+        const incomplete = list.filter(function(p){ return p['완료여부'] !== '완료'; });
+        if(incomplete.length){
+          const namesStr = incomplete.map(function(p){ return p['닉네임']; }).join(', ');
+          const escNames = namesStr.replace(/'/g,"\\'");
+          html += '<div class="penaltysummary">'
+            + '<div class="penaltysummary-head"><span>⚠️ 미완료자 명단 (패널티 대상) · '+incomplete.length+'명</span>'
+            + '<button class="btn small ghost" onclick="copyText(\''+escNames+'\')">명단 복사</button></div>';
+          incomplete.forEach(function(p){
+            const val = room['유형']==='키워드' ? p['개인키워드'] : p['개인링크'];
+            const escVal = (val||'').replace(/'/g,"\\'");
+            html += '<div class="penaltyrow"><span class="pname">'+p['닉네임']+'</span><span class="meta">'+(val||'-')+'</span>'
+              + '<button class="btn small ghost" onclick="copyAndPreview(\''+escVal+'\',\''+room['유형']+'\')">📋 복사</button></div>';
+          });
+          html += '</div>';
+        }
+      }
+
+      box.innerHTML = html;
+    });
+  }
+
+  // 복사 버튼: 값을 복사하면서 미리보기용 새창도 함께 열어줌 (완료처리는 하지 않음 - 완료처리는 방문/참석 버튼에서)
+  function copyAndPreview(value, roomType){
+    copyText(value);
+    if(roomType==='키워드'){
+      window.open('https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query=' + encodeURIComponent(value), '_blank', 'noopener,noreferrer');
+    } else if(/^https?:\/\//i.test(value)){
+      window.open(value, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  function visitUI(roomId, targetNickname, value, roomType, btnEl){
+    if(btnEl.disabled) return;
+
+    // 목적지 URL은 클릭 시점에 이미 알고 있으므로, 응답을 기다리지 않고 클릭 즉시(동기적으로) 새 창을 엽니다.
+    if(roomType==='키워드'){
+      window.open('https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query=' + encodeURIComponent(value), '_blank', 'noopener,noreferrer');
+    } else if(/^https?:\/\//i.test(value)){
+      window.open(value, '_blank', 'noopener,noreferrer');
+    }
+
+    const originalHTML = btnEl.innerHTML;
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<span class="spinner"></span> 처리중';
+
+    apiPost('visit', { roomId: roomId, visitorNickname: currentUser['닉네임'], targetNickname: targetNickname }).then(res=>{
+      if(!res.success){
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalHTML;
+        showMsg(res.message,'err');
+        return;
+      }
+      btnEl.disabled = false;
+      btnEl.textContent = '방문완료';
+      btnEl.classList.remove('visit');
+      btnEl.classList.add('visited');
+      showMsg('처리되었습니다.');
+    }).catch(()=>{
+      btnEl.disabled = false;
+      btnEl.innerHTML = originalHTML;
+      showMsg('오류가 발생했습니다. 다시 시도해주세요.','err');
+    });
+  }
+
+  function reportMissingUI(roomId, targetNickname, btn){
+    if(!confirm(targetNickname+'님이 실제로 품앗이를 하지 않았나요?\n(완료로 표시되어 있어도 실제 방문하지 않았다면 신고해주세요)\n신고 즉시 패널티가 부여됩니다.')) return;
+    if(btn) setBtnLoading(btn, '신고중');
+    apiPost('reportMissing', { roomId: roomId, reporterNickname: currentUser['닉네임'], targetNickname: targetNickname }).then(res=>{
+      if(res.success){ showMsg('신고가 접수되었습니다. 패널티가 부여됩니다.'); if(btn){ btn.textContent = '신고완료'; } }
+      else { showMsg(res.message,'err'); if(btn) clearBtnLoading(btn, '🚩 신고'); }
+    }).catch(function(){
+      showMsg('오류가 발생했습니다. 다시 시도해주세요.','err');
+      if(btn) clearBtnLoading(btn, '🚩 신고');
+    });
+  }
+
+  function copyText(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ showMsg('복사되었습니다.'); }).catch(function(){});
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showMsg('복사되었습니다.'); } catch(e){}
+      document.body.removeChild(ta);
+    }
+  }
+
+  let creatingRoom = false;
+
+  function createKw(){
+    if(creatingRoom) return;
+    const start = document.getElementById('kwStart').value;
+    const cap = document.getElementById('kwCap').value;
+    const missions = Array.from(document.querySelectorAll('.kwMission:checked')).map(function(c){ return c.value; });
+    if(!start){ alert('시작 시간을 선택해주세요.'); return; }
+    if(!cap || !Number.isInteger(Number(cap)) || Number(cap) < 1){ alert('모집 인원은 1 이상의 정수로 입력해주세요.'); return; }
+    if(!missions.length){ alert('원하는 품앗이(미션)를 1개 이상 선택해주세요.'); return; }
+
+    creatingRoom = true;
+    const btn = document.getElementById('kwCreateBtn');
+    setBtnLoading(btn, '생성 중');
+    document.getElementById('kwProgressWrap').classList.remove('hidden');
+
+    apiPost('createKeywordRoom', {
+      creator: currentUser['닉네임'], startTime: start.replace('T',' ')+':00',
+      capacity: cap,
+      missions: missions,
+      roomName: document.getElementById('kwName').value.trim()
+    }).then(function(res){
+      creatingRoom = false;
+      clearBtnLoading(btn, '키워드방 만들기');
+      document.getElementById('kwProgressWrap').classList.add('hidden');
+      if(res.success){
+        showMsg('"'+(res.roomName||res.roomId||'새 방')+'" 생성 완료!');
+        switchRoomType('키워드', true);
+        switchTabProgrammatic('rooms', true);
+        if(sharedRoomFocusMode) loadRooms(); else renderRoomListHTML(res.rooms || []);
+      }
+      else showMsg(res.message,'err');
+    }).catch(function(){
+      creatingRoom = false;
+      clearBtnLoading(btn, '키워드방 만들기');
+      document.getElementById('kwProgressWrap').classList.add('hidden');
+      showMsg('생성 중 오류가 발생했습니다. 다시 시도해주세요.','err');
+    });
+  }
+
+  function createLk(){
+    if(creatingRoom) return;
+    const start = document.getElementById('lkStart').value;
+    const cap = document.getElementById('lkCap').value;
+    const waitMin = document.getElementById('lkWait').value;
+    const progressMin = document.getElementById('lkProgress').value;
+    const missions = Array.from(document.querySelectorAll('.lkMission:checked')).map(function(c){ return c.value; });
+    if(!start){ alert('시작 시간을 선택해주세요.'); return; }
+    if(!cap || !Number.isInteger(Number(cap)) || Number(cap) < 1){ alert('모집 인원은 1 이상의 정수로 입력해주세요.'); return; }
+    if(!waitMin || !Number.isInteger(Number(waitMin)) || Number(waitMin) < 1){ alert('대기시간은 1분 이상의 정수로 입력해주세요.'); return; }
+    if(!progressMin || !Number.isInteger(Number(progressMin)) || Number(progressMin) < 1){ alert('진행시간을 1분 이상 입력해주세요.'); return; }
+    if(!missions.length){ alert('원하는 품앗이(미션)를 1개 이상 선택해주세요.'); return; }
+
+    creatingRoom = true;
+    const btn = document.getElementById('lkCreateBtn');
+    setBtnLoading(btn, '생성 중');
+    document.getElementById('lkProgressWrap').classList.remove('hidden');
+
+    apiPost('createLinkRoom', {
+      creator: currentUser['닉네임'], startTime: start.replace('T',' ')+':00',
+      capacity: cap,
+      waitMin: waitMin,
+      progressMin: progressMin,
+      missions: missions,
+      roomName: document.getElementById('lkName').value.trim()
+    }).then(function(res){
+      creatingRoom = false;
+      clearBtnLoading(btn, '링크방 만들기');
+      document.getElementById('lkProgressWrap').classList.add('hidden');
+      if(res.success){
+        showMsg('"'+(res.roomName||res.roomId||'새 방')+'" 생성 완료!');
+        switchRoomType('링크', true);
+        switchTabProgrammatic('rooms', true);
+        if(sharedRoomFocusMode) loadRooms(); else renderRoomListHTML(res.rooms || []);
+      }
+      else showMsg(res.message,'err');
+    }).catch(function(){
+      creatingRoom = false;
+      clearBtnLoading(btn, '링크방 만들기');
+      document.getElementById('lkProgressWrap').classList.add('hidden');
+      showMsg('생성 중 오류가 발생했습니다. 다시 시도해주세요.','err');
+    });
+  }
+
+  function loadMyInfo(){
+    renderDashboard();
+    document.getElementById('myParticipationsList').innerHTML = '<div class="loading">불러오는 중...</div>';
+    document.getElementById('calendarBox').innerHTML = '<div class="loading">불러오는 중...</div>';
+    document.getElementById('penaltyBox').innerHTML = '<div class="loading">불러오는 중...</div>';
+
+    apiGet('getMyParticipations', { nickname: currentUser['닉네임'] }).then(function(list){
+      myParticipationsCache = list;
+      if(!list.length){ document.getElementById('myParticipationsList').innerHTML = '<div class="empty">아직 참여한 방이 없어요.</div>'; return; }
+      let html = '';
+      list.slice().reverse().forEach(function(r){
+        const doneBadge = r['완료여부']==='완료' ? 'ok' : 'wait';
+        html += '<div class="roomcard '+(r['유형']==='키워드'?'type-keyword':'type-link')+'" onclick="toggleMyParticipationDetail(\''+r['RoomID']+'\')" style="cursor:pointer;">'
+          + '<div class="top"><div><span class="typechip '+(r['유형']==='키워드'?'type-keyword':'type-link')+'">'+r['유형']+'</span>'+(r['방이름']||r['RoomID'])+'</div>'
+          + '<span class="chip '+doneBadge+'">'+r['완료여부']+'</span></div>'
+          + '<div class="meta">참여시각 '+r['참여시각']+' · 👆 눌러서 참여자명단 보기</div>'
+          + '<div id="mydetail-'+r['RoomID']+'"></div></div>';
+      });
+      document.getElementById('myParticipationsList').innerHTML = html;
+    });
+
+    apiGet('getWeeklyCalendar', { nickname: currentUser['닉네임'] }).then(function(cal){
+      const days = Object.keys(cal);
+      document.getElementById('calendarBox').innerHTML = days.length
+        ? '<div class="table-wrap"><table>'+days.map(function(d){ return '<tr><th>'+d+'</th><td>'+cal[d]+'회</td></tr>'; }).join('')+'</table></div>'
+        : '<div class="empty">참여 기록이 없어요.</div>';
+    });
+
+    apiGet('getPenaltyRooms', { nickname: currentUser['닉네임'] }).then(function(list){
+      if(!list.length){ document.getElementById('penaltyBox').innerHTML = '<div class="empty">패널티가 없어요. 정상 이용 가능합니다 ✅</div>'; return; }
+      let html = '';
+      list.forEach(function(p){
+        html += '<div class="roomcard"><div class="top"><div class="name">'+p['사유']+'</div><span class="chip bad">미해제</span></div>'
+          + '<div class="meta">발생일 '+p['발생일']+' · 관련방 '+p['RoomID']+'</div>'
+          + '<div class="actions">'
+          + '<button class="btn small ghost" onclick="togglePenaltyDetail(\''+p['PenaltyID']+'\',\''+p['RoomID']+'\')">놓친 목록 보기</button>'
+          + '<button class="btn small" onclick="releaseSelfUI(\''+p['PenaltyID']+'\',this)">패널티 완료</button>'
+          + '</div><div id="pen-detail-'+p['PenaltyID']+'"></div></div>';
+      });
+      document.getElementById('penaltyBox').innerHTML = html;
+    });
+  }
+
+  function togglePenaltyDetail(penaltyId, roomId){
+    const box = document.getElementById('pen-detail-'+penaltyId);
+    if(box.dataset.open === '1'){ box.innerHTML=''; box.dataset.open='0'; return; }
+    box.dataset.open = '1';
+    renderRoomDetail(roomId, box, true);
+  }
+
+  // 내 참여 내역에서 방을 누르면 그 방의 참여자명단을 펼쳐서 보여줌
+  function toggleMyParticipationDetail(roomId){
+    const box = document.getElementById('mydetail-'+roomId);
+    if(!box) return;
+    if(box.dataset.open === '1'){ box.innerHTML=''; box.dataset.open='0'; return; }
+    box.dataset.open = '1';
+    renderRoomDetail(roomId, box, false);
+  }
+
+  function releaseSelfUI(penaltyId, btn){
+    setBtnLoading(btn, '처리중');
+    apiPost('releasePenaltySelf', { penaltyId: penaltyId, nickname: currentUser['닉네임'] }).then(function(res){
+      clearBtnLoading(btn, '패널티 완료');
+      if(res.success){ showMsg('패널티가 해제되었습니다.'); currentUser['패널티상태']='정상'; loadMyInfo(); }
+      else showMsg(res.message,'err');
+    }).catch(function(){
+      clearBtnLoading(btn, '패널티 완료');
+      showMsg('오류가 발생했습니다. 다시 시도해주세요.','err');
+    });
+  }
+
+  function copyMyParticipations(){
+    const list = myParticipationsCache;
+    if(!list || !list.length){ showMsg('참여한 방이 없어요.','err'); return; }
+    const text = list.map(function(r){ return r['참여시각']+' | '+r['유형']+' | '+r['방이름']+' | '+r['완료여부']; }).join('\n');
+    copyText(text);
+    showMsg('내 참여방 목록 '+list.length+'건이 복사되었습니다.');
+  }
+
+  if(initApi()) boot();
+  initSharedRoomFromUrl();
+  updatePreview('kw');
+  updatePreview('lk');
+  // 서버 버전 확인은 이제 자동으로 호출하지 않습니다 (모든 사용자 페이지로드마다 불필요한 서버 왕복이 추가되던 것을 제거).
+  // 필요하면 브라우저 콘솔에서 apiGet('version').then(v=>console.log(v)) 를 직접 실행해서 확인할 수 있습니다.
+</script>
 </body>
 </html>
