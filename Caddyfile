@@ -1,4 +1,8 @@
-:80 {
+www.blogpoom.kro.kr {
+  redir https://blogpoom.kro.kr{uri} permanent
+}
+
+blogpoom.kro.kr {
   encode zstd gzip
   reverse_proxy app:3000
 }
