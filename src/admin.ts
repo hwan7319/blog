@@ -98,11 +98,15 @@ export async function listUsers(request: Request, env: Env): Promise<Response> {
   const status = new URL(request.url).searchParams.get("status");
   if (status && !["pending", "approved", "rejected", "locked"].includes(status)) return error("invalid_account_status", 400);
 
+  const select = `SELECT u.id, u.nickname, u.blog_url, u.blog_name, u.account_status, u.approved_at, u.created_at,
+    (SELECT COUNT(*) FROM room_participants p WHERE p.user_id = u.id) AS participation_count,
+    CASE WHEN EXISTS(SELECT 1 FROM penalties p WHERE p.user_id = u.id AND p.status = 'unresolved') THEN '패널티' ELSE '정상' END AS penalty_status
+    FROM users u`;
   const statement = status
-    ? env.DB.prepare("SELECT id, nickname, blog_url, blog_name, account_status, approved_at, created_at FROM users WHERE account_status = ? ORDER BY created_at DESC LIMIT 100").bind(status)
-    : env.DB.prepare("SELECT id, nickname, blog_url, blog_name, account_status, approved_at, created_at FROM users ORDER BY created_at DESC LIMIT 100");
-  const result = await statement.all<UserListRow>();
-  return json({ users: (result.results ?? []).map((row) => toPublicUser(row)) });
+    ? env.DB.prepare(`${select} WHERE u.account_status = ? ORDER BY u.created_at DESC LIMIT 100`).bind(status)
+    : env.DB.prepare(`${select} ORDER BY u.created_at DESC LIMIT 100`);
+  const result = await statement.all<UserListRow & { participation_count: number; penalty_status: string }>();
+  return json({ users: (result.results ?? []).map((row) => ({ ...toPublicUser(row), participationCount: row.participation_count, penaltyStatus: row.penalty_status })) });
 }
 
 export async function updateAccountStatus(request: Request, env: Env, userId: string): Promise<Response> {
@@ -132,7 +136,7 @@ export async function listAdminRooms(request: Request, env: Env): Promise<Respon
   if (isResponse(admin)) return admin;
   const result = await env.DB.prepare(
     `SELECT r.id, r.name, r.room_type, r.capacity, r.join_starts_at, r.join_ends_at, r.closes_at, r.room_status,
-            u.nickname AS creator_nickname, COUNT(p.id) AS participant_count
+            r.missions_json, u.nickname AS creator_nickname, COUNT(p.id) AS participant_count
      FROM rooms r JOIN users u ON u.id = r.creator_id
      LEFT JOIN room_participants p ON p.room_id = r.id
      GROUP BY r.id ORDER BY r.created_at DESC LIMIT ?`,
