@@ -272,4 +272,25 @@ describe("administrator operations API", () => {
     const penalty = await env.DB.prepare("SELECT status FROM penalties WHERE id = ?").bind(penaltyId).first<{ status: string }>();
     expect(penalty?.status).toBe("resolved");
   });
+
+  it("lets a locked member resolve their last completed-room penalty and restores access", async () => {
+    const member = await createApprovedSession("penalty-member");
+    const roomId = crypto.randomUUID();
+    const penaltyId = crypto.randomUUID();
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare(`INSERT INTO rooms (id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, missions_json, created_at)
+        VALUES (?, ?, 'keyword', ?, 1, ?, ?, ?, '["공감"]', ?)`).bind(roomId, "Resolved penalty room", member.userId, now - 120_000, now - 60_000, now - 1, now),
+      env.DB.prepare("INSERT INTO room_participants (id, room_id, user_id, keyword, joined_at, completed_at) VALUES (?, ?, ?, ?, ?, ?)")
+        .bind(crypto.randomUUID(), roomId, member.userId, "complete", now - 100_000, now - 1),
+      env.DB.prepare("INSERT INTO penalties (id, user_id, room_id, reason, status, issued_at, locked_at) VALUES (?, ?, ?, 'auto_incomplete', 'unresolved', ?, ?)")
+        .bind(penaltyId, member.userId, roomId, now - 100_000, now - 50_000),
+      env.DB.prepare("UPDATE users SET account_status = 'locked' WHERE id = ?").bind(member.userId),
+    ]);
+    const result = await api(`/api/penalties/${penaltyId}/resolve`, { method: "POST", headers: { Cookie: member.cookie } });
+    expect(result.status).toBe(200);
+    expect(await result.json()).toMatchObject({ accountUnlocked: true });
+    const user = await env.DB.prepare("SELECT account_status FROM users WHERE id = ?").bind(member.userId).first<{ account_status: string }>();
+    expect(user?.account_status).toBe("approved");
+  });
 });
