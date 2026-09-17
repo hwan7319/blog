@@ -1,5 +1,5 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
-import { bootstrapAdmin, createDatabaseRecord, databaseOverview, deleteDatabaseRecord, listAdminPenalties, listAdminReports, listAdminRooms, listAdminVisits, listAuditLogs, listDatabaseTable, listUsers, updateAccountStatus, updateDatabaseRecord, updateReportStatus } from "./admin";
+import { bootstrapAdmin, createDatabaseRecord, databaseOverview, deleteDatabaseRecord, forceDeleteRoom, listAdminPenalties, listAdminReports, listAdminRooms, listAdminVisits, listAuditLogs, listDatabaseTable, listUsers, resolveAdminPenalty, updateAccountStatus, updateDatabaseRecord, updateReportStatus } from "./admin";
 import { createRoom, deleteRoom, getRoom, joinRoom, listRooms, updateMyParticipation } from "./rooms";
 import { closeExpiredRooms, getParticipants, lockOverduePenalties, releasePenalty, reportParticipant, visitParticipant } from "./activity";
 import { createReport, myParticipations, myPenalties, weeklyActivity } from "./dashboard";
@@ -48,6 +48,12 @@ export default {
 
     const reportStatusMatch = url.pathname.match(/^\/api\/admin\/reports\/([0-9a-f-]{36})\/status$/i);
     if (request.method === "PATCH" && reportStatusMatch) return updateReportStatus(request, env, reportStatusMatch[1]);
+
+    const adminRoomMatch = url.pathname.match(/^\/api\/admin\/rooms\/([0-9a-f-]{36})$/i);
+    if (request.method === "DELETE" && adminRoomMatch) return forceDeleteRoom(request, env, adminRoomMatch[1]);
+
+    const adminPenaltyMatch = url.pathname.match(/^\/api\/admin\/penalties\/([0-9a-f-]{36})\/resolve$/i);
+    if (request.method === "POST" && adminPenaltyMatch) return resolveAdminPenalty(request, env, adminPenaltyMatch[1]);
 
     const databaseTableMatch = url.pathname.match(/^\/api\/admin\/database\/([a-z_]+)$/i);
     if (request.method === "GET" && databaseTableMatch) return listDatabaseTable(request, env, databaseTableMatch[1]);

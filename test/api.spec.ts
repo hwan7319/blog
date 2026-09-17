@@ -252,5 +252,24 @@ describe("administrator operations API", () => {
     });
     expect(resolved.status).toBe(200);
     expect(await resolved.json()).toMatchObject({ id: reportId, reportStatus: "resolved", resolvedBy: admin.userId });
+
+    const roomId = crypto.randomUUID();
+    const penaltyId = crypto.randomUUID();
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare(`INSERT INTO rooms (id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, missions_json, created_at)
+        VALUES (?, ?, 'keyword', ?, 2, ?, ?, ?, '["공감"]', ?)`).bind(roomId, "Admin operation room", reporter.userId, now, now + 60_000, now + 120_000, now),
+      env.DB.prepare("INSERT INTO penalties (id, user_id, room_id, reason, status, issued_at) VALUES (?, ?, ?, 'admin', 'unresolved', ?)")
+        .bind(penaltyId, target.userId, roomId, now),
+    ]);
+    const deletedRoom = await api(`/api/admin/rooms/${roomId}`, { method: "DELETE", headers: { Cookie: admin.cookie } });
+    expect(deletedRoom.status).toBe(200);
+    const room = await env.DB.prepare("SELECT room_status FROM rooms WHERE id = ?").bind(roomId).first<{ room_status: string }>();
+    expect(room?.room_status).toBe("deleted");
+
+    const resolvedPenalty = await api(`/api/admin/penalties/${penaltyId}/resolve`, { method: "POST", headers: { Cookie: admin.cookie } });
+    expect(resolvedPenalty.status).toBe(200);
+    const penalty = await env.DB.prepare("SELECT status FROM penalties WHERE id = ?").bind(penaltyId).first<{ status: string }>();
+    expect(penalty?.status).toBe("resolved");
   });
 });

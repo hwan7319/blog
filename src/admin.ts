@@ -214,6 +214,30 @@ export async function updateReportStatus(request: Request, env: Env, reportId: s
   return json({ id: reportId, reportStatus, resolvedAt: now, resolvedBy: admin.id });
 }
 
+export async function forceDeleteRoom(request: Request, env: Env, roomId: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const room = await env.DB.prepare("SELECT id, room_status FROM rooms WHERE id = ?").bind(roomId).first<{ id: string; room_status: string }>();
+  if (!room) return error("room_not_found", 404);
+  if (room.room_status === "deleted") return error("room_already_deleted", 409);
+  const now = Date.now();
+  await env.DB.prepare("UPDATE rooms SET room_status = 'deleted', deleted_at = ? WHERE id = ?").bind(now, roomId).run();
+  await audit(env, admin.id, "room_force_deleted", roomId, { from: room.room_status });
+  return json({ id: roomId, deleted: true, deletedAt: now });
+}
+
+export async function resolveAdminPenalty(request: Request, env: Env, penaltyId: string): Promise<Response> {
+  const admin = await requireAdmin(request, env);
+  if (isResponse(admin)) return admin;
+  const penalty = await env.DB.prepare("SELECT id, status FROM penalties WHERE id = ?").bind(penaltyId).first<{ id: string; status: string }>();
+  if (!penalty) return error("penalty_not_found", 404);
+  if (penalty.status === "resolved") return error("penalty_already_resolved", 409);
+  const now = Date.now();
+  await env.DB.prepare("UPDATE penalties SET status = 'resolved', resolved_at = ? WHERE id = ?").bind(now, penaltyId).run();
+  await audit(env, admin.id, "penalty_resolved_by_admin", penaltyId, { from: penalty.status });
+  return json({ id: penaltyId, status: "resolved", resolvedAt: now });
+}
+
 export async function databaseOverview(request: Request, env: Env): Promise<Response> {
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
