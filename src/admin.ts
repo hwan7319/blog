@@ -135,7 +135,7 @@ export async function listAdminRooms(request: Request, env: Env): Promise<Respon
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
   const result = await env.DB.prepare(
-    `SELECT r.id, r.name, r.room_type, r.capacity, r.join_starts_at, r.join_ends_at, r.closes_at, r.room_status,
+    `SELECT r.id, r.legacy_room_id, r.name, r.room_type, r.capacity, r.join_starts_at, r.join_ends_at, r.closes_at, r.room_status,
             r.missions_json, u.nickname AS creator_nickname, COUNT(p.id) AS participant_count
      FROM rooms r JOIN users u ON u.id = r.creator_id
      LEFT JOIN room_participants p ON p.room_id = r.id
@@ -148,7 +148,7 @@ export async function listAdminVisits(request: Request, env: Env): Promise<Respo
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
   const result = await env.DB.prepare(
-    `SELECT v.id, v.room_id, r.name AS room_name, visitor.nickname AS visitor_nickname,
+    `SELECT v.id, v.legacy_visit_id, v.room_id, r.legacy_room_id, r.name AS room_name, visitor.nickname AS visitor_nickname,
             target.nickname AS target_nickname, v.visited_at
      FROM visits v JOIN rooms r ON r.id = v.room_id
      JOIN users visitor ON visitor.id = v.visitor_id JOIN users target ON target.id = v.target_id
@@ -161,7 +161,7 @@ export async function listAdminPenalties(request: Request, env: Env): Promise<Re
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
   const result = await env.DB.prepare(
-    `SELECT p.id, p.room_id, r.name AS room_name, u.id AS user_id, u.nickname, p.reason, p.status,
+    `SELECT p.id, p.legacy_penalty_id, p.room_id, r.legacy_room_id, r.name AS room_name, u.id AS user_id, u.nickname, p.reason, p.status,
             p.issued_at, p.resolved_at, p.locked_at
      FROM penalties p JOIN rooms r ON r.id = p.room_id JOIN users u ON u.id = p.user_id
      ORDER BY p.issued_at DESC LIMIT ?`,
@@ -173,7 +173,7 @@ export async function listAdminReports(request: Request, env: Env): Promise<Resp
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
   const result = await env.DB.prepare(
-    `SELECT report.id, report.room_id, room.name AS room_name, reporter.nickname AS reporter_nickname,
+    `SELECT report.id, report.legacy_report_id, report.room_id, room.legacy_room_id, room.name AS room_name, reporter.nickname AS reporter_nickname,
             target.nickname AS target_nickname, report.reason, report.report_status, report.created_at,
             report.resolved_at, resolver.nickname AS resolved_by_nickname
      FROM reports report JOIN users reporter ON reporter.id = report.reporter_id
@@ -221,25 +221,25 @@ export async function updateReportStatus(request: Request, env: Env, reportId: s
 export async function forceDeleteRoom(request: Request, env: Env, roomId: string): Promise<Response> {
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
-  const room = await env.DB.prepare("SELECT id, room_status FROM rooms WHERE id = ?").bind(roomId).first<{ id: string; room_status: string }>();
+  const room = await env.DB.prepare("SELECT id, room_status FROM rooms WHERE id = ? OR legacy_room_id = ?").bind(roomId, roomId).first<{ id: string; room_status: string }>();
   if (!room) return error("room_not_found", 404);
   if (room.room_status === "deleted") return error("room_already_deleted", 409);
   const now = Date.now();
-  await env.DB.prepare("UPDATE rooms SET room_status = 'deleted', deleted_at = ? WHERE id = ?").bind(now, roomId).run();
-  await audit(env, admin.id, "room_force_deleted", roomId, { from: room.room_status });
-  return json({ id: roomId, deleted: true, deletedAt: now });
+  await env.DB.prepare("UPDATE rooms SET room_status = 'deleted', deleted_at = ? WHERE id = ?").bind(now, room.id).run();
+  await audit(env, admin.id, "room_force_deleted", room.id, { from: room.room_status });
+  return json({ id: room.id, deleted: true, deletedAt: now });
 }
 
 export async function resolveAdminPenalty(request: Request, env: Env, penaltyId: string): Promise<Response> {
   const admin = await requireAdmin(request, env);
   if (isResponse(admin)) return admin;
-  const penalty = await env.DB.prepare("SELECT id, status FROM penalties WHERE id = ?").bind(penaltyId).first<{ id: string; status: string }>();
+  const penalty = await env.DB.prepare("SELECT id, status FROM penalties WHERE id = ? OR legacy_penalty_id = ?").bind(penaltyId, penaltyId).first<{ id: string; status: string }>();
   if (!penalty) return error("penalty_not_found", 404);
   if (penalty.status === "resolved") return error("penalty_already_resolved", 409);
   const now = Date.now();
-  await env.DB.prepare("UPDATE penalties SET status = 'resolved', resolved_at = ? WHERE id = ?").bind(now, penaltyId).run();
-  await audit(env, admin.id, "penalty_resolved_by_admin", penaltyId, { from: penalty.status });
-  return json({ id: penaltyId, status: "resolved", resolvedAt: now });
+  await env.DB.prepare("UPDATE penalties SET status = 'resolved', resolved_at = ? WHERE id = ?").bind(now, penalty.id).run();
+  await audit(env, admin.id, "penalty_resolved_by_admin", penalty.id, { from: penalty.status });
+  return json({ id: penalty.id, status: "resolved", resolvedAt: now });
 }
 
 export async function databaseOverview(request: Request, env: Env): Promise<Response> {

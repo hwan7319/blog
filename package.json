@@ -11,7 +11,8 @@
     "check": "tsc --noEmit",
     "test": "vitest run",
     "start:ec2": "tsx server/index.ts",
-    "seed:demo": "tsx scripts/seed-demo.ts"
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "import:legacy": "tsx scripts/import-legacy-sheets.ts"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.1.10",
