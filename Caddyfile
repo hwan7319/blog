@@ -1,16 +1,3 @@
-{
-  auto_https disable_redirects
-}
-
-http://www.blogpoom.kro.kr {
-  redir http://blogpoom.kro.kr{uri} permanent
-}
-
-http://blogpoom.kro.kr {
-  encode zstd gzip
-  reverse_proxy app:3000
-}
-
 www.blogpoom.kro.kr {
   redir https://blogpoom.kro.kr{uri} permanent
 }
