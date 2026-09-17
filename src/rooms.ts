@@ -213,6 +213,30 @@ export async function joinRoom(request: Request, env: Env, roomId: string): Prom
   return json({ ok: true, roomId }, { status: 201 });
 }
 
+export async function updateMyParticipation(request: Request, env: Env, roomId: string): Promise<Response> {
+  const user = await requireUser(request, env);
+  if (isResponse(user)) return user;
+  const body = await requestBody(request);
+  if (!body) return error("invalid_json", 400);
+  const room = await queryRooms(env, "WHERE r.id = ? AND r.room_status != 'deleted'", [roomId]).first<RoomRow>();
+  if (!room) return error("room_not_found", 404);
+  if (Date.now() >= room.join_ends_at) return error("room_join_closed", 409);
+  const value = room.room_type === "keyword" ? stringValue(body, "keyword") : stringValue(body, "linkUrl");
+  if (!value) return error("participant_value_required", 400);
+  if (room.room_type === "link") {
+    try {
+      const url = new URL(value);
+      if (!['http:', 'https:'].includes(url.protocol)) return error("invalid_link_url", 400);
+    } catch { return error("invalid_link_url", 400); }
+  }
+  const result = await env.DB.prepare(
+    "UPDATE room_participants SET keyword = ?, link_url = ? WHERE room_id = ? AND user_id = ?",
+  ).bind(room.room_type === "keyword" ? value : null, room.room_type === "link" ? value : null, roomId, user.id).run();
+  if ((result.meta.changes ?? 0) !== 1) return error("room_participant_required", 403);
+  await audit(env, user.id, "room_participation_updated", "room", roomId);
+  return json({ ok: true, roomId });
+}
+
 export async function deleteRoom(request: Request, env: Env, roomId: string): Promise<Response> {
   const user = await requireUser(request, env);
   if (isResponse(user)) return user;

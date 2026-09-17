@@ -1,6 +1,6 @@
 import { adminMe, json, login, logout, me, signup } from "./auth";
 import { bootstrapAdmin, createDatabaseRecord, databaseOverview, deleteDatabaseRecord, listAdminPenalties, listAdminReports, listAdminRooms, listAdminVisits, listAuditLogs, listDatabaseTable, listUsers, updateAccountStatus, updateDatabaseRecord, updateReportStatus } from "./admin";
-import { createRoom, deleteRoom, getRoom, joinRoom, listRooms } from "./rooms";
+import { createRoom, deleteRoom, getRoom, joinRoom, listRooms, updateMyParticipation } from "./rooms";
 import { closeExpiredRooms, getParticipants, lockOverduePenalties, releasePenalty, reportParticipant, visitParticipant } from "./activity";
 import { createReport, myParticipations, myPenalties, weeklyActivity } from "./dashboard";
 
@@ -64,6 +64,7 @@ export default {
     const joinMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})\/participants$/i);
     if (joinMatch && request.method === "POST") return joinRoom(request, env, joinMatch[1]);
     if (joinMatch && request.method === "GET") return getParticipants(request, env, joinMatch[1]);
+    if (joinMatch && request.method === "PATCH") return updateMyParticipation(request, env, joinMatch[1]);
 
     const visitMatch = url.pathname.match(/^\/api\/rooms\/([0-9a-f-]{36})\/visits\/([0-9a-f-]{36})$/i);
     if (visitMatch && request.method === "POST") return visitParticipant(request, env, visitMatch[1], visitMatch[2]);

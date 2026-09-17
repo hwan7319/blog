@@ -113,6 +113,27 @@ describe("room API", () => {
     expect(count?.count).toBe(1);
   });
 
+  it("lets a participant update their keyword before recruitment closes", async () => {
+    const member = await createApprovedSession("entry-update");
+    const roomId = crypto.randomUUID();
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO rooms (id, name, room_type, creator_id, capacity, join_starts_at, join_ends_at, closes_at, missions_json, created_at)
+         VALUES (?, ?, 'keyword', ?, 2, ?, ?, ?, '["공감"]', ?)`,
+      ).bind(roomId, "Entry update room", member.userId, now - 1_000, now + 60_000, now + 120_000, now),
+      env.DB.prepare("INSERT INTO room_participants (id, room_id, user_id, keyword, joined_at) VALUES (?, ?, ?, ?, ?)")
+        .bind(crypto.randomUUID(), roomId, member.userId, "before", now),
+    ]);
+    const response = await api(`/api/rooms/${roomId}/participants`, {
+      method: "PATCH", headers: { "Content-Type": "application/json", Cookie: member.cookie }, body: JSON.stringify({ keyword: "after" }),
+    });
+    expect(response.status).toBe(200);
+    const entry = await env.DB.prepare("SELECT keyword FROM room_participants WHERE room_id = ? AND user_id = ?")
+      .bind(roomId, member.userId).first<{ keyword: string }>();
+    expect(entry?.keyword).toBe("after");
+  });
+
   it("marks visits complete and penalizes only the incomplete member at closure", async () => {
     const first = await createApprovedSession("visitor");
     const second = await createApprovedSession("target");
