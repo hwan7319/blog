@@ -42,7 +42,8 @@ function requestFromExpress(request: express.Request): Request {
     headers.set(name, Array.isArray(value) ? value.join(", ") : value);
   }
   const method = request.method.toUpperCase();
-  return new Request(`http://${request.headers.host ?? "localhost"}${request.originalUrl}`, {
+  const protocol = request.headers["x-forwarded-proto"]?.toString().split(",", 1)[0] || request.protocol || "http";
+  return new Request(`${protocol}://${request.headers.host ?? "localhost"}${request.originalUrl}`, {
     method, headers, body: ["GET", "HEAD"].includes(method) ? undefined : JSON.stringify(request.body ?? {}),
   });
 }
@@ -78,6 +79,7 @@ const env = { DB: new SqliteD1(database), BOOTSTRAP_ADMIN_SECRET: process.env.BO
 
 const app = express();
 app.disable("x-powered-by");
+app.set("trust proxy", 1);
 app.use("/api", express.json({ limit: "64kb" }));
 app.use("/api", async (request, response, next) => {
   try { await sendWorkerResponse(await worker.fetch(requestFromExpress(request), env, {} as ExecutionContext), response); }
