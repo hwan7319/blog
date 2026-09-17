@@ -197,12 +197,6 @@ export async function releasePenalty(request: Request, env: Env, penaltyId: stri
   const now = Date.now();
   await env.DB.prepare("UPDATE penalties SET status = 'resolved', resolved_at = ? WHERE id = ? AND status = 'unresolved'")
     .bind(now, penalty.id).run();
-  const remaining = await env.DB.prepare("SELECT COUNT(*) AS count FROM penalties WHERE user_id = ? AND status = 'unresolved'")
-    .bind(user.id).first<{ count: number }>();
-  if ((remaining?.count ?? 0) === 0) {
-    await env.DB.prepare("UPDATE users SET account_status = 'approved', updated_at = ? WHERE id = ? AND account_status = 'locked'")
-      .bind(now, user.id).run();
-  }
   await audit(env, user.id, "penalty_resolved", "penalty", penalty.id);
-  return json({ ok: true, accountUnlocked: (remaining?.count ?? 0) === 0 });
+  return json({ ok: true });
 }

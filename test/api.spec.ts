@@ -273,7 +273,7 @@ describe("administrator operations API", () => {
     expect(penalty?.status).toBe("resolved");
   });
 
-  it("lets a locked member resolve their last completed-room penalty and restores access", async () => {
+  it("allows a locked member to resolve a completed-room penalty without changing the account lock", async () => {
     const member = await createApprovedSession("penalty-member");
     const roomId = crypto.randomUUID();
     const penaltyId = crypto.randomUUID();
@@ -289,8 +289,7 @@ describe("administrator operations API", () => {
     ]);
     const result = await api(`/api/penalties/${penaltyId}/resolve`, { method: "POST", headers: { Cookie: member.cookie } });
     expect(result.status).toBe(200);
-    expect(await result.json()).toMatchObject({ accountUnlocked: true });
     const user = await env.DB.prepare("SELECT account_status FROM users WHERE id = ?").bind(member.userId).first<{ account_status: string }>();
-    expect(user?.account_status).toBe("approved");
+    expect(user?.account_status).toBe("locked");
   });
 });
