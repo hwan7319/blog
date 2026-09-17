@@ -169,13 +169,16 @@ const database = new Database(databasePath);
 database.pragma("foreign_keys = ON");
 const now = Date.now();
 const retainedAdmins = database.prepare("SELECT u.id, u.nickname FROM users u JOIN user_roles r ON r.user_id = u.id WHERE r.role = 'admin'").all() as Array<{ id: string; nickname: string }>;
-const retainedNames = new Set(retainedAdmins.map((admin) => admin.nickname.toLocaleLowerCase()));
+const retainedByName = new Map(retainedAdmins.map((admin) => [admin.nickname.toLocaleLowerCase(), admin]));
+const retainedNames = new Set(retainedByName.keys());
 const incomingNames = new Set([...rows.Users.map((row) => text(row["닉네임"])), ...rows.Admins.map((row) => text(row["아이디"])), ...orphanNames].map((name) => name.toLocaleLowerCase()));
-for (const name of retainedNames) if (incomingNames.has(name)) throw new Error(`현재 관리자와 이관 대상 닉네임이 충돌합니다: ${name}`);
+const sourceAdminNames = new Set(rows.Admins.map((row) => text(row["아이디"]).toLocaleLowerCase()));
+for (const name of retainedNames) if (incomingNames.has(name) && !sourceAdminNames.has(name)) throw new Error(`현재 관리자와 이관 대상 닉네임이 충돌합니다: ${name}`);
 
 const userIds = new Map<string, string>();
 for (const row of rows.Users) userIds.set(text(row["닉네임"]), uuid(`user:${text(row.UserID)}`));
 for (const row of rows.Admins) userIds.set(text(row["아이디"]), uuid(`admin:${text(row.AdminID)}`));
+for (const [name, admin] of retainedByName) if (sourceAdminNames.has(name)) userIds.set(admin.nickname, admin.id);
 for (const name of orphanNames) userIds.set(name, uuid(`orphan:${name}`));
 const roomIds = new Map(rows.Rooms.map((row) => [text(row.RoomID), uuid(`room:${text(row.RoomID)}`)]));
 const closedAtByRoom = new Map<string, number>();
@@ -198,6 +201,7 @@ const run = database.transaction(() => {
     insertUser.run(userIds.get(text(row["닉네임"])), text(row.UserID), text(row["닉네임"]), passwordHash(text(row["비밀번호"])), text(row["블로그주소"]), text(row["블로그명"]), status, optionalDate(row["승인일"], "Users.승인일"), createdAt, createdAt);
   }
   for (const row of rows.Admins) {
+    if (retainedByName.has(text(row["아이디"]).toLocaleLowerCase())) continue;
     const createdAt = date(row["생성일"], "Admins.생성일");
     const id = userIds.get(text(row["아이디"]))!;
     insertUser.run(id, `admin:${text(row.AdminID)}`, text(row["아이디"]), passwordHash(text(row["비밀번호"])), `https://legacy-admin.invalid/${encodeURIComponent(text(row["아이디"]))}`, "기존 관리자 계정", "approved", createdAt, createdAt, createdAt);
