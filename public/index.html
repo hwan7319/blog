@@ -352,9 +352,9 @@
     if(action==='getRoomParticipants'){const x=await api('/api/rooms/'+p.roomId+'/participants');const rows=x.participants.map(v=>({'닉네임':v.nickname,'블로그명':v.blog_name,'개인키워드':v.keyword||'','개인링크':v.link_url||'','완료여부':v.completed_at?'완료':'미완료',userId:v.user_id}));participantCache.set(p.roomId,{rows,visits:x.myVisitedTargetIds||[]});return rows;}
     if(action==='getMyVisits'){if(!participantCache.has(p.roomId))await apiGet('getRoomParticipants',p);const x=participantCache.get(p.roomId);return x.rows.filter(v=>x.visits.includes(v.userId)).map(v=>v['닉네임']);}
     if(action==='getRooms')return [...roomCache.values()];
-    if(action==='getMyParticipations'){const x=await api('/api/me/participations');return x.participations.map(v=>({'RoomID':v.roomId,'방이름':v.roomName,'유형':typeName(v.roomType),'참여시각':timeText(v.joinedAt),'완료여부':v.completedAt?'완료':'미완료'}));}
+    if(action==='getMyParticipations'){const x=await api('/api/me/participations');await Promise.all(x.participations.map(v=>api('/api/rooms/'+v.roomId).then(r=>room(r.room)).catch(()=>null)));return x.participations.map(v=>({'RoomID':v.roomId,'방이름':v.roomName,'유형':typeName(v.roomType),'참여시각':timeText(v.joinedAt),'완료여부':v.completedAt?'완료':'미완료'}));}
     if(action==='getWeeklyCalendar')return (await api('/api/me/activity')).days;
-    if(action==='getPenaltyRooms'){const x=await api('/api/me/penalties');return x.penalties.filter(v=>v.status==='unresolved').map(v=>({'PenaltyID':v.id,'RoomID':v.roomId,'사유':reasonName(v.reason),'발생일':timeText(v.issuedAt),'해제여부':'미해제'}));}
+    if(action==='getPenaltyRooms'){const x=await api('/api/me/penalties');const open=x.penalties.filter(v=>v.status==='unresolved');await Promise.all(open.map(v=>api('/api/rooms/'+v.roomId).then(r=>room(r.room)).catch(()=>null)));return open.map(v=>({'PenaltyID':v.id,'RoomID':v.roomId,'사유':reasonName(v.reason),'발생일':timeText(v.issuedAt),'해제여부':'미해제'}));}
     return [];
   }catch(e){return {error:errText(e.message)};}}
   async function apiPost(action,p={}){try{
