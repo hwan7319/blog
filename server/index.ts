@@ -83,6 +83,8 @@ app.use("/api", async (request, response, next) => {
   try { await sendWorkerResponse(await worker.fetch(requestFromExpress(request), env, {} as ExecutionContext), response); }
   catch (error) { next(error); }
 });
+app.get("/admin.html", (_request, response) => response.redirect(308, "/admin"));
+app.get("/admin", (_request, response) => response.sendFile(path.resolve("public/admin.html")));
 app.use(express.static(path.resolve("public"), { index: "index.html" }));
 app.use((_request, response) => response.sendFile(path.resolve("public/index.html")));
 app.use((error: Error, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
